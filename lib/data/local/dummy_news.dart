@@ -1,0 +1,55 @@
+import '../models/news.dart';
+
+final List<News> dummyNews = [
+  News(
+    id: 'news-001',
+    title: 'Jumlah UMKM Ponorogo Meledak, Didominasi Perempuan yang Siap Naik Kelas',
+    summary: 'Perkembangan UMKM di Ponorogo menunjukkan potensi besar, dengan banyak pelaku usaha perempuan yang siap mengembangkan usahanya ke tingkat lebih tinggi.',
+    source: 'Pemerintah Kabupaten Ponorogo',
+    sourceUrl: 'https://ponorogo.go.id/2026/10/19/jumlah-umkm-ponorogo-meledak-didominasi-perempuan-yang-siap-naik-kelas/',
+    imageUrl: 'assets/images/news/news_001.jpg',
+    regionId: 'demo-ponorogo',
+    publishedAt: DateTime(2026, 10, 19),
+  ),
+  News(
+    id: 'news-002',
+    title: 'Perjalanan Reog Ponorogo Hingga Diakui UNESCO',
+    summary: 'Reog Ponorogo merupakan kesenian tradisional yang menjadi bagian penting dari kekayaan budaya Indonesia dan perjalanan pelestariannya hingga mendapat pengakuan UNESCO.',
+    source: 'Kementerian Pariwisata',
+    sourceUrl: 'https://kemenpar.go.id/berita/perjalanan-reog-ponorogo-hingga-diakui-unesco',
+    imageUrl: 'assets/images/news/news_002.jpg',
+    regionId: 'demo-ponorogo',
+    // Sementara: ganti dengan tanggal terbit asli setelah dikonfirmasi.
+    publishedAt: DateTime.now(),
+  ),
+  News(
+    id: 'news-003',
+    title: 'Kemilau Pekan Raya Ponorogo Pamerkan Inovasi Teknologi, Multiproduk, dan Hiburan Rakyat',
+    summary: 'Pekan Raya Ponorogo menghadirkan beragam produk, inovasi teknologi, serta hiburan sebagai bagian dari kegiatan yang mempertemukan masyarakat dan pelaku usaha.',
+    source: 'Pemerintah Kabupaten Ponorogo',
+    sourceUrl: 'https://ponorogo.go.id/2026/11/04/kemilau-pekan-raya-ponorogo-pamerkan-inovasi-teknologi-multiproduk-hiburan-rakyat/',
+    imageUrl: 'assets/images/news/news_003.jpg',
+    regionId: 'demo-ponorogo',
+    publishedAt: DateTime(2026, 11, 4),
+  ),
+  News(
+    id: 'news-004',
+    title: 'Pemkab Jombang Latih 1017 Tenaga Siap Kerja',
+    summary: 'Pemerintah Kabupaten Jombang menyelenggarakan pelatihan berbagai keterampilan, mulai dari pengelasan, menjahit, tata boga, hingga digital marketing untuk meningkatkan kompetensi tenaga kerja.',
+    source: 'Pemerintah Kabupaten Jombang',
+    sourceUrl: 'https://www.jombangkab.go.id/berita/pemkab-jombang-latih-1017-tenaga-siap-kerja-siapkan-skill-las-jahit-tata-boga-dan-digital-marketing-12742',
+    imageUrl: 'assets/images/news/news_004.jpg',
+    regionId: 'demo-jombang',
+    publishedAt: DateTime(2025, 5, 19),
+  ),
+  News(
+    id: 'news-005',
+    title: 'Pasar Sleko Lantai 2 Jadi Pusat Kreativitas Anak Muda',
+    summary: 'Youth Creative Week menjadi kegiatan pembuka pemanfaatan lantai 2 Pasar Sleko sebagai ruang kreativitas dan aktivitas anak muda di Kota Madiun.',
+    source: 'Madiun Today',
+    sourceUrl: 'https://madiuntoday.id/berita/2026/07/02/pasar-sleko-lantai-2-jadi-pusat-kreatifitas-anak-muda-youth-creative-week-jadi-event-pembuka',
+    imageUrl: 'assets/images/news/news_005.jpg',
+    regionId: 'demo-madiun',
+    publishedAt: DateTime(2026, 7, 2),
+  ),
+];
