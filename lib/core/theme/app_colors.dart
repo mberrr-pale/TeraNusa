@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  AppColors._();
   // Warna utama aplikasi
   static const Color primary = Color(0xFF1B5E20);
   static const Color primaryDark = Color(0xFF124D23);
   static const Color primaryLight = Color(0xFFE8F4E9);
+
   static const Color heading = Color(0xFF173B1A);
   static const Color background = Color(0xFFF4FAF4);
   static const Color border = Color(0xFFDCEBDC);
