@@ -102,3 +102,21 @@ class AppTextField extends StatelessWidget {
     );
   }
 }
+
+class AppFieldLabel extends StatelessWidget {
+  final String label;
+
+  const AppFieldLabel({super.key, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: const TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
