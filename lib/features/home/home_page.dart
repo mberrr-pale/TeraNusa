@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_header.dart';
+import '../../core/widgets/app_bottom_navigation.dart';
+import '../../core/widgets/app_dialog.dart';
 import '../../core/widgets/opportunity_card.dart';
-import '../../data/local/dummy_opportunities.dart';
-import '../../data/models/opportunity.dart';
-import '../../data/repositories/opportunity_repository.dart';
+import '../../core/widgets/news_card.dart';
 import '../../core/widgets/states/app_loading.dart';
 import '../../core/widgets/states/app_error.dart';
 import '../../core/widgets/states/app_empty.dart';
-import '../../core/widgets/news_card.dart';
+import '../../data/local/dummy_opportunities.dart';
 import '../../data/local/dummy_news.dart';
+import '../../data/models/opportunity.dart';
+import '../../data/repositories/opportunity_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,6 +41,12 @@ class _HomePageState extends State<HomePage> {
     await _opportunitiesFuture;
   }
 
+  // REUSABLE DIALOG
+
+  void showPageInfo(String title, String message) {
+    AppDialog.show(context, title: title, message: message);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,10 +54,8 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            // REUSABLE HEADER (TETAP)
             const AppHeader(),
 
-            // KONTEN FEED (SCROLLABLE)
             Expanded(
               child: RefreshIndicator(
                 color: AppColors.primary,
@@ -70,10 +76,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    // OPPORTUNITY LIST
                     _buildOpportunityList(),
 
-                    // LOCAL NEWS
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(14, 20, 14, 20),
@@ -87,7 +91,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
+      bottomNavigationBar: const AppBottomNavigation(currentIndex: 0),
     );
   }
 
@@ -254,24 +258,9 @@ class _HomePageState extends State<HomePage> {
           ),
           TextButton(
             onPressed: () {
-              showDialog<void>(
-                context: context,
-                builder: (dialogContext) {
-                  return AlertDialog(
-                    title: const Text('Informasi'),
-                    content: const Text(
-                      'Fitur login masih dalam tahap pengembangan.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: const Text('Mengerti'),
-                      ),
-                    ],
-                  );
-                },
+              showPageInfo(
+                'Informasi',
+                'Fitur login masih dalam tahap pengembangan.',
               );
             },
             style: TextButton.styleFrom(
@@ -313,24 +302,9 @@ class _HomePageState extends State<HomePage> {
         ),
         InkWell(
           onTap: () {
-            showDialog<void>(
-              context: context,
-              builder: (dialogContext) {
-                return AlertDialog(
-                  title: const Text('Informasi'),
-                  content: const Text(
-                    'Halaman Kategori sedang dalam tahap pengembangan.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop();
-                      },
-                      child: const Text('Mengerti'),
-                    ),
-                  ],
-                );
-              },
+            showPageInfo(
+              'Peluang',
+              'Halaman Peluang sedang dalam tahap pengembangan.',
             );
           },
           child: Row(
@@ -415,47 +389,17 @@ class _HomePageState extends State<HomePage> {
                   regionName:
                       dummyRegionNames[opportunity.regionId] ?? 'Wilayah lokal',
                   onTap: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (dialogContext) {
-                        return AlertDialog(
-                          title: const Text('Detail Peluang'),
-                          content: const Text(
-                            'Halaman detail peluang sedang '
-                            'dalam tahap pengembangan.',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop();
-                              },
-                              child: const Text('Mengerti'),
-                            ),
-                          ],
-                        );
-                      },
+                    showPageInfo(
+                      'Detail Peluang',
+                      'Halaman detail peluang sedang '
+                          'dalam tahap pengembangan.',
                     );
                   },
                   onBookmarkTap: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (dialogContext) {
-                        return AlertDialog(
-                          title: const Text('Simpan Peluang'),
-                          content: const Text(
-                            'Fitur menyimpan peluang sedang '
-                            'dalam tahap pengembangan.',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop();
-                              },
-                              child: const Text('Mengerti'),
-                            ),
-                          ],
-                        );
-                      },
+                    showPageInfo(
+                      'Simpan Peluang',
+                      'Fitur menyimpan peluang sedang '
+                          'dalam tahap pengembangan.',
                     );
                   },
                 ),
@@ -497,24 +441,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 InkWell(
                   onTap: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (dialogContext) {
-                        return AlertDialog(
-                          title: const Text('Berita'),
-                          content: const Text(
-                            'Halaman Berita sedang dalam tahap pengembangan.',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop();
-                              },
-                              child: const Text('Mengerti'),
-                            ),
-                          ],
-                        );
-                      },
+                    showPageInfo(
+                      'Berita',
+                      'Halaman Berita sedang dalam tahap pengembangan.',
                     );
                   },
                   child: Row(
@@ -558,24 +487,10 @@ class _HomePageState extends State<HomePage> {
                     news: news,
                     width: cardWidth,
                     onTap: () {
-                      showDialog<void>(
-                        context: context,
-                        builder: (dialogContext) {
-                          return AlertDialog(
-                            title: const Text('Detail Berita'),
-                            content: const Text(
-                              'Halaman detail berita sedang dalam tahap pengembangan.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(dialogContext).pop();
-                                },
-                                child: const Text('Mengerti'),
-                              ),
-                            ],
-                          );
-                        },
+                      showPageInfo(
+                        'Detail Berita',
+                        'Halaman detail berita sedang '
+                            'dalam tahap pengembangan.',
                       );
                     },
                   );
@@ -585,75 +500,6 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       },
-    );
-  }
-
-  // BOTTOM NAVIGATION
-
-  Widget _buildBottomNavigation() {
-    void showPageInfo(String pageName) {
-      showDialog<void>(
-        context: context,
-        builder: (dialogContext) {
-          return AlertDialog(
-            title: Text(pageName),
-            content: Text('Halaman $pageName sedang dalam tahap pengembangan.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                },
-                child: const Text('Mengerti'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: 0,
-      backgroundColor: AppColors.white,
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.secondaryText,
-      selectedFontSize: 10,
-      unselectedFontSize: 10,
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            // Sudah berada di halaman Beranda.
-            break;
-          case 1:
-            showPageInfo('Kategori');
-            break;
-          case 2:
-            showPageInfo('Tersimpan');
-            break;
-          case 3:
-            showPageInfo('Profil');
-            break;
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
-          label: 'Beranda',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.category_outlined),
-          label: 'Kategori',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bookmark_border),
-          label: 'Tersimpan',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          label: 'Profil',
-        ),
-      ],
     );
   }
 }

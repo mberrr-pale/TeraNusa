@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/home/home_page.dart';
+import '../../features/search_filter/opportunity_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/home',
@@ -9,6 +10,11 @@ final GoRouter appRouter = GoRouter(
       path: '/home',
       name: 'home',
       builder: (context, state) => const HomePage(),
+    ),
+    GoRoute(
+      path: '/opportunities',
+      name: 'opportunities',
+      builder: (context, state) => const OpportunityPage(),
     ),
   ],
 );
