@@ -9,9 +9,10 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/home/home_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../../features/search_filter/opportunity_page.dart';
+import '../../features/news/news_page.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -96,6 +97,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return const OpportunityPage();
         },
+      ),
+
+      GoRoute(
+        path: AppRoutes.news,
+        name: 'news',
+        builder: (context, state) => const NewsPage(),
       ),
 
       GoRoute(

@@ -11,6 +11,7 @@ class Opportunity {
   final String? imageUrl;
   final String status;
   final DateTime? createdAt;
+  final String? regionName;
 
   const Opportunity({
     this.opportunityId,
@@ -25,9 +26,25 @@ class Opportunity {
     this.imageUrl,
     this.status = 'active',
     this.createdAt,
+    this.regionName,
   });
 
   factory Opportunity.fromMap(Map<String, dynamic> map) {
+    final regionData = map['regions'];
+    final region = regionData is Map
+        ? Map<String, dynamic>.from(regionData)
+        : null;
+
+    final city = region?['city']?.toString() ?? '';
+    final province = region?['province']?.toString() ?? '';
+
+    final cleanCity = city.replaceFirst(RegExp(r'^(Kota|Kabupaten)\s+'), '');
+
+    final regionName = [
+      cleanCity,
+      province,
+    ].where((value) => value.isNotEmpty).join(', ');
+
     return Opportunity(
       opportunityId: map['opportunity_id']?.toString(),
       userId: map['user_id'].toString(),
@@ -43,6 +60,7 @@ class Opportunity {
       createdAt: map['created_at'] != null
           ? DateTime.tryParse(map['created_at'].toString())
           : null,
+      regionName: regionName.isEmpty ? null : regionName,
     );
   }
 

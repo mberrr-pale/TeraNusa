@@ -9,7 +9,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_password_field.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_section_header.dart';
-import '../../../../core/widgets/app_popup.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../region/presentation/providers/region_provider.dart';
 import '../../../../data/models/region_model.dart';
 
@@ -54,21 +54,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (selectedRegionId == null) {
-      AppPopUp.show(
-        context: context,
+      AppDialog.show(
+        context,
         title: 'Wilayah belum dipilih',
         message: 'Silakan pilih wilayah utama terlebih dahulu.',
-        type: AppPopupType.warning,
+        type: AppDialogType.warning,
       );
       return;
     }
 
     if (!isAgreed) {
-      AppPopUp.show(
-        context: context,
+      AppDialog.show(
+        context,
         title: 'Perhatian',
         message: 'Silakan setujui ketentuan terlebih dahulu.',
-        type: AppPopupType.warning,
+        type: AppDialogType.warning,
       );
       return;
     }
@@ -89,24 +89,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final result = ref.read(authProvider);
 
     if (result.hasError) {
-      AppPopUp.show(
-        context: context,
+      AppDialog.show(
+        context,
         title: 'Registrasi Gagal',
         message: result.error.toString(),
-        type: AppPopupType.error,
+        type: AppDialogType.error,
         duration: const Duration(seconds: 5),
       );
       return;
     }
 
-    await AppPopUp.show(
-      context: context,
+    await AppDialog.show(
+      context,
       title: 'Registrasi Berhasil',
       message: 'Selamat datang di TeraNusa! Akun kamu berhasil dibuat.',
-      type: AppPopupType.success,
+      type: AppDialogType.success,
     );
 
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     context.go(AppRoutes.home);
   }

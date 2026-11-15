@@ -11,10 +11,10 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_password_field.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_badge.dart';
-import '../../../../core/widgets/app_popup.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 import '../providers/auth_provider.dart';
-import '../../../../data/models/user_profile_model.dart';
+// import '../../../../data/models/user_profile_model.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -36,14 +36,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  void redirectByRole(UserProfile profile) {
-    if (profile.isAdmin) {
-      context.go(AppRoutes.adminHome);
-    } else if (profile.isContributor) {
-      context.go(AppRoutes.contributorHome);
-    } else {
-      context.go(AppRoutes.home);
-    }
+  // void redirectByRole(UserProfile profile) {
+  //   if (profile.isAdmin) {
+  //     context.go(AppRoutes.adminHome);
+  //   } else if (profile.isContributor) {
+  //     context.go(AppRoutes.contributorHome);
+  //   } else {
+  //     context.go(AppRoutes.home);
+  //   }
+  // }
+
+  //navigasi sementara untuk pengujian
+  void redirectAfterLogin() {
+    context.go(AppRoutes.home);
   }
 
   // LOGIN
@@ -60,29 +65,31 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (!mounted) return;
 
-      AppPopUp.show(
-        context: context,
-        type: AppPopupType.success,
+      AppDialog.show(
+        context,
+        type: AppDialogType.success,
         title: 'Login berhasil',
         message: 'Selamat datang kembali, ${profile.name}.',
       );
 
-      redirectByRole(profile);
+      // redirectByRole(profile);
+      //untuk pengujian
+      redirectAfterLogin();
     } on AuthException catch (e) {
       if (!mounted) return;
 
-      AppPopUp.show(
-        context: context,
-        type: AppPopupType.error,
+      AppDialog.show(
+        context,
+        type: AppDialogType.error,
         title: 'Login gagal',
         message: e.message,
       );
     } catch (e) {
       if (!mounted) return;
 
-      AppPopUp.show(
-        context: context,
-        type: AppPopupType.error,
+      AppDialog.show(
+        context,
+        type: AppDialogType.error,
         title: 'Terjadi kesalahan',
         message: 'Tidak dapat memuat profil akun. Silakan coba kembali.',
         duration: const Duration(seconds: 5),
@@ -156,7 +163,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.20),
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.20,
+                                ),
                                 blurRadius: 15,
                                 offset: const Offset(0, 6),
                               ),

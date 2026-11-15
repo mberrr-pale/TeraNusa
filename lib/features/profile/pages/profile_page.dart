@@ -16,7 +16,7 @@ class ProfilePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const TeraNusaHeader(),
+              const AppHeader(),
               _buildProfileHeader(),
 
               const SizedBox(height: 20),
@@ -197,7 +197,7 @@ class ProfilePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.cardShadow.withOpacity(0.1),
+                      color: AppColors.cardShadow.withValues(alpha: 0.1),
                       blurRadius: 14,
                       offset: const Offset(0, 5),
                     ),

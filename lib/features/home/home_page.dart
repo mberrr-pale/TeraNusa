@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_header.dart';
@@ -10,10 +13,10 @@ import '../../core/widgets/news_card.dart';
 import '../../core/widgets/states/app_loading.dart';
 import '../../core/widgets/states/app_error.dart';
 import '../../core/widgets/states/app_empty.dart';
-import '../../data/local/dummy_opportunities.dart';
-import '../../data/local/dummy_news.dart';
 import '../../data/models/opportunity.dart';
 import '../../data/repositories/opportunity_repository.dart';
+import '../../data/models/news.dart';
+import '../../data/repositories/news_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,22 +26,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final OpportunityRepository _repository = OpportunityRepository();
+  final OpportunityRepository _repository = OpportunityRepository(
+    Supabase.instance.client,
+  );
+  final NewsRepository _newsRepository = NewsRepository(
+    Supabase.instance.client,
+  );
 
   late Future<List<Opportunity>> _opportunitiesFuture;
+  late Future<List<News>> _newsFuture;
 
   @override
   void initState() {
     super.initState();
     _opportunitiesFuture = _repository.getFeedOpportunities();
+    _newsFuture = _newsRepository.getFeedNews();
   }
 
   Future<void> _refreshFeed() async {
     setState(() {
       _opportunitiesFuture = _repository.getFeedOpportunities();
+      _newsFuture = _newsRepository.getFeedNews();
     });
 
-    await _opportunitiesFuture;
+    await Future.wait([_opportunitiesFuture, _newsFuture]);
   }
 
   // REUSABLE DIALOG
@@ -81,7 +92,7 @@ class _HomePageState extends State<HomePage> {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(14, 20, 14, 20),
-                        child: _buildLocalNewsSection(),
+                        child: _buildNewsSection(),
                       ),
                     ),
                   ],
@@ -171,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                           'JELAJAHI WILAYAH',
                           style: TextStyle(
                             color: AppColors.primary,
-                            fontSize: 8,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.4,
                           ),
@@ -200,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                       'dari warga untuk warga.',
                       style: AppTextStyles.secondary.copyWith(
                         color: AppColors.bannerText,
-                        fontSize: 11,
+                        fontSize: 14,
                         height: 1.6,
                       ),
                     ),
@@ -246,12 +257,12 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Text(
                   'Kamu sedang menjelajah sebagai tamu',
-                  style: AppTextStyles.cardTitle.copyWith(fontSize: 9),
+                  style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   'Masuk untuk menyimpan dan berkontribusi',
-                  style: AppTextStyles.secondary.copyWith(fontSize: 8),
+                  style: AppTextStyles.secondary.copyWith(fontSize: 11),
                 ),
               ],
             ),
@@ -272,7 +283,7 @@ class _HomePageState extends State<HomePage> {
               'Masuk',
               style: AppTextStyles.button.copyWith(
                 color: AppColors.primary,
-                fontSize: 10,
+                fontSize: 14,
               ),
             ),
           ),
@@ -295,17 +306,14 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 3),
               Text(
                 'Informasi peluang yang masih berlaku',
-                style: AppTextStyles.secondary.copyWith(fontSize: 9),
+                style: AppTextStyles.secondary.copyWith(fontSize: 13),
               ),
             ],
           ),
         ),
         InkWell(
           onTap: () {
-            showPageInfo(
-              'Peluang',
-              'Halaman Peluang sedang dalam tahap pengembangan.',
-            );
+            context.go(AppRoutes.opportunities);
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -314,7 +322,7 @@ class _HomePageState extends State<HomePage> {
                 'Lihat semua',
                 style: AppTextStyles.label.copyWith(
                   color: AppColors.primary,
-                  fontSize: 9,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -370,7 +378,7 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.all(30),
               child: AppEmpty(
                 title: 'Belum ada peluang',
-                message: 'Peluang baru akan muncul di sini.',
+                description: 'Peluang baru akan muncul di sini.',
               ),
             ),
           );
@@ -387,7 +395,7 @@ class _HomePageState extends State<HomePage> {
                 child: OpportunityCard(
                   opportunity: opportunity,
                   regionName:
-                      dummyRegionNames[opportunity.regionId] ?? 'Wilayah lokal',
+                      opportunity.regionName ?? 'Wilayah tidak diketahui',
                   onTap: () {
                     showPageInfo(
                       'Detail Peluang',
@@ -413,91 +421,131 @@ class _HomePageState extends State<HomePage> {
 
   // LOCAL NEWS
 
-  Widget _buildLocalNewsSection() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cardWidth = (constraints.maxWidth - 10) / 2;
-        final newsList = dummyNews.take(5).toList();
+  Widget _buildNewsSection() {
+    return FutureBuilder<List<News>>(
+      future: _newsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(32),
+            child: AppLoading(message: 'Memuat berita...'),
+          );
+        }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // SECTION HEADER
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: AppError(
+              message: 'Gagal memuat berita.',
+              onRetry: () {
+                setState(() {
+                  _newsFuture = _newsRepository.getFeedNews();
+                });
+              },
+            ),
+          );
+        }
+
+        final newsList = snapshot.data ?? [];
+
+        if (newsList.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(30),
+            child: AppEmpty(
+              title: 'Belum ada berita',
+              description: 'Berita daerah akan muncul di sini.',
+            ),
+          );
+        }
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final cardWidth = (constraints.maxWidth - 10) / 2;
+            final displayedNews = newsList.take(5).toList();
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Kabar daerah', style: AppTextStyles.sectionTitle),
-                      const SizedBox(height: 3),
-                      Text(
-                        'Berita pilihan dari sumber lokal.',
-                        style: AppTextStyles.secondary.copyWith(fontSize: 9),
+                // SECTION HEADER
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kabar daerah',
+                            style: AppTextStyles.sectionTitle,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Berita pilihan dari sumber lokal.',
+                            style: AppTextStyles.secondary.copyWith(
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        context.go(AppRoutes.news);
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Lihat semua',
+                            style: AppTextStyles.label.copyWith(
+                              color: AppColors.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(
+                            Icons.chevron_right,
+                            color: AppColors.primary,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                InkWell(
-                  onTap: () {
-                    showPageInfo(
-                      'Berita',
-                      'Halaman Berita sedang dalam tahap pengembangan.',
-                    );
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Lihat semua',
-                        style: AppTextStyles.label.copyWith(
-                          color: AppColors.primary,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: AppColors.primary,
-                        size: 16,
-                      ),
-                    ],
+
+                const SizedBox(height: 12),
+
+                // HORIZONTAL NEWS LIST
+                SizedBox(
+                  height: 220,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: displayedNews.length,
+                    separatorBuilder: (context, index) {
+                      return const SizedBox(width: 10);
+                    },
+                    itemBuilder: (context, index) {
+                      final news = displayedNews[index];
+
+                      return NewsCard(
+                        news: news,
+                        width: cardWidth,
+                        onTap: () {
+                          showPageInfo(
+                            'Detail Berita',
+                            'Halaman detail berita sedang '
+                                'dalam tahap pengembangan.',
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // HORIZONTAL NEWS LIST
-            SizedBox(
-              height: 220,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: newsList.length,
-                separatorBuilder: (context, index) {
-                  return const SizedBox(width: 10);
-                },
-                itemBuilder: (context, index) {
-                  final news = newsList[index];
-
-                  return NewsCard(
-                    news: news,
-                    width: cardWidth,
-                    onTap: () {
-                      showPageInfo(
-                        'Detail Berita',
-                        'Halaman detail berita sedang '
-                            'dalam tahap pengembangan.',
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
     );

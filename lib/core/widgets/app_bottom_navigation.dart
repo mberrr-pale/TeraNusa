@@ -18,11 +18,7 @@ class AppBottomNavigation extends StatelessWidget {
         context.go('/opportunities');
         break;
       case 2:
-        _showPageInfo(
-          context,
-          'Berita',
-          'Halaman Berita sedang dalam tahap pengembangan.',
-        );
+        context.go('/news');
         break;
       case 3:
         _showPageInfo(

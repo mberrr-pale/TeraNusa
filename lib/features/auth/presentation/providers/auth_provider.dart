@@ -79,10 +79,6 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
           state = const AsyncData(null);
           break;
 
-        case AuthChangeEvent.userDeleted:
-          state = const AsyncData(null);
-          break;
-
         case AuthChangeEvent.userUpdated:
           refreshProfile(data.session?.user.id);
           break;

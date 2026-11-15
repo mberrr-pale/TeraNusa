@@ -10,6 +10,7 @@ class AppRoutes {
   static const String contributorHome = '/contributor';
   static const String adminHome = '/admin';
   static const String opportunities = '/opportunities';
+  static const String news = '/news';
 
   // Profile
   static const String profile = '/profile';
