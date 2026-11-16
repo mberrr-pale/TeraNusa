@@ -23,33 +23,11 @@ class VerificationBadge extends StatelessWidget {
   }
 
   Color get _categoryColor {
-    switch (category) {
-      case 'lowongan':
-        return AppColors.job;
-      case 'event':
-        return AppColors.event;
-      case 'pemberdayaan':
-        return AppColors.empowerment;
-      case 'produk_jasa':
-        return AppColors.product;
-      default:
-        return AppColors.primary;
-    }
+    return AppColors.categoryColor(category);
   }
 
   Color get _categoryBackground {
-    switch (category) {
-      case 'lowongan':
-        return AppColors.jobBackground;
-      case 'event':
-        return AppColors.eventBackground;
-      case 'pemberdayaan':
-        return AppColors.empowermentBackground;
-      case 'produk_jasa':
-        return AppColors.productBackground;
-      default:
-        return AppColors.background;
-    }
+    return AppColors.categoryBackground(category);
   }
 
   Widget _buildCategoryBadge() {

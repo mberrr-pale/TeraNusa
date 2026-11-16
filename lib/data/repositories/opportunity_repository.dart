@@ -7,7 +7,22 @@ class OpportunityRepository {
 
   OpportunityRepository(this._supabase);
 
-  /// Mengambil peluang aktif yang belum melewati tanggal berakhir.
+  Future<List<String>> getAvailableCities() async {
+    final response = await _supabase
+        .from('regions')
+        .select('city')
+        .order('city');
+
+    final cities = response
+        .map((item) => item['city']?.toString() ?? '')
+        .where((city) => city.trim().isNotEmpty)
+        .toSet()
+        .toList();
+
+    cities.sort();
+    return cities;
+  }
+
   Future<List<Opportunity>> getFeedOpportunities() async {
     final today = DateTime.now().toIso8601String().split('T').first;
 
@@ -23,24 +38,61 @@ class OpportunityRepository {
         .toList();
   }
 
-  /// Mencari peluang berdasarkan judul, deskripsi, dan sumber.
-  Future<List<Opportunity>> searchOpportunities(String query) async {
+  Future<List<Opportunity>> searchOpportunities(
+    String query, {
+    String? category,
+    String? city,
+    String sortBy = 'Terbaru',
+  }) async {
     final opportunities = await getFeedOpportunities();
-
     final keyword = query.trim().toLowerCase();
 
-    if (keyword.isEmpty) {
-      return opportunities;
+    var results = opportunities.where((opportunity) {
+      final matchesKeyword =
+          keyword.isEmpty ||
+          opportunity.title.toLowerCase().contains(keyword) ||
+          opportunity.description.toLowerCase().contains(keyword) ||
+          (opportunity.source ?? '').toLowerCase().contains(keyword);
+
+      final matchesCategory =
+          category == null ||
+          category == 'Semua' ||
+          opportunity.category.trim().toLowerCase() ==
+              category.trim().toLowerCase();
+
+      final matchesCity =
+          city == null ||
+          city == 'Semua wilayah' ||
+          opportunity.regionCity?.toLowerCase() == city.toLowerCase();
+
+      return matchesKeyword && matchesCategory && matchesCity;
+    }).toList();
+
+    if (sortBy == 'Segera berakhir') {
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final end = start.add(const Duration(days: 8));
+
+      results = results.where((opportunity) {
+        final endDate = opportunity.endDate;
+        return !endDate.isBefore(start) && endDate.isBefore(end);
+      }).toList();
+
+      results.sort((a, b) => a.endDate.compareTo(b.endDate));
+    } else if (sortBy == 'Terlama') {
+      results.sort((a, b) {
+        return (a.createdAt ?? DateTime(1970)).compareTo(
+          b.createdAt ?? DateTime(1970),
+        );
+      });
+    } else {
+      results.sort((a, b) {
+        return (b.createdAt ?? DateTime(1970)).compareTo(
+          a.createdAt ?? DateTime(1970),
+        );
+      });
     }
 
-    return opportunities.where((opportunity) {
-      final title = opportunity.title.toLowerCase();
-      final description = opportunity.description.toLowerCase();
-      final source = (opportunity.source ?? '').toLowerCase();
-
-      return title.contains(keyword) ||
-          description.contains(keyword) ||
-          source.contains(keyword);
-    }).toList();
+    return results;
   }
 }

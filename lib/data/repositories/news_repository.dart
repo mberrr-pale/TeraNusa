@@ -7,11 +7,26 @@ class NewsRepository {
 
   NewsRepository(this._supabase);
 
-  /// Mengambil berita terbaru dari Supabase.
+  Future<List<String>> getAvailableCities() async {
+    final response = await _supabase
+        .from('regions')
+        .select('city')
+        .order('city');
+
+    final cities = response
+        .map((item) => item['city']?.toString() ?? '')
+        .where((city) => city.trim().isNotEmpty)
+        .toSet()
+        .toList();
+
+    cities.sort();
+    return cities;
+  }
+
   Future<List<News>> getFeedNews() async {
     final response = await _supabase
         .from('news')
-        .select()
+        .select('*, regions(city, province)')
         .order('published_at', ascending: false);
 
     return (response as List)
@@ -19,24 +34,35 @@ class NewsRepository {
         .toList();
   }
 
-  /// Mencari berita berdasarkan judul, ringkasan, dan sumber.
-  Future<List<News>> searchNews(String query) async {
+  Future<List<News>> searchNews(
+    String query, {
+    String? city,
+    String sortBy = 'Terbaru',
+  }) async {
     final newsList = await getFeedNews();
-
     final keyword = query.trim().toLowerCase();
 
-    if (keyword.isEmpty) {
-      return newsList;
+    final results = newsList.where((news) {
+      final matchesKeyword =
+          keyword.isEmpty ||
+          news.title.toLowerCase().contains(keyword) ||
+          news.summary.toLowerCase().contains(keyword) ||
+          news.source.toLowerCase().contains(keyword);
+
+      final matchesCity =
+          city == null ||
+          city == 'Semua wilayah' ||
+          news.regionCity?.toLowerCase() == city.toLowerCase();
+
+      return matchesKeyword && matchesCity;
+    }).toList();
+
+    if (sortBy == 'Terlama') {
+      results.sort((a, b) => a.publishedAt.compareTo(b.publishedAt));
+    } else {
+      results.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
     }
 
-    return newsList.where((news) {
-      final title = news.title.toLowerCase();
-      final summary = news.summary.toLowerCase();
-      final source = news.source.toLowerCase();
-
-      return title.contains(keyword) ||
-          summary.contains(keyword) ||
-          source.contains(keyword);
-    }).toList();
+    return results;
   }
 }
