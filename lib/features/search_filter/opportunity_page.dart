@@ -414,7 +414,7 @@ class _OpportunityPageState extends State<OpportunityPage> {
           ],
         ),
       ),
-      bottomNavigationBar: const AppBottomNavigation(currentIndex: 1),
+      bottomNavigationBar: const AppBottomNavigation(),
     );
   }
 }

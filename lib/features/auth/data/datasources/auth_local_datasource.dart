@@ -8,25 +8,40 @@ class AuthLocalDataSource {
 
   AuthLocalDataSource(this.database);
 
-  // Simpan profil
+  // SIMPAN / SINKRONISASI PROFIL
   Future<void> saveUserProfile(model.UserProfile profile) async {
-    await database
-        .into(database.userProfiles)
-        .insertOnConflictUpdate(
-          db.UserProfilesCompanion.insert(
-            userId: profile.userId,
-            name: Value(profile.name),
-            username: Value(profile.username),
-            email: Value(profile.email),
-            phone: Value(profile.phone),
-            regionId: Value(profile.regionId),
-            isContributor: Value(profile.isContributor),
-            isAdmin: Value(profile.isAdmin),
-          ),
-        );
+    await database.transaction(() async {
+      // Ambil data lokal sebelumnya.
+      final existing =
+          await (database.select(database.userProfiles)
+                ..where((table) => table.userId.equals(profile.userId)))
+              .getSingleOrNull();
+
+      await database
+          .into(database.userProfiles)
+          .insertOnConflictUpdate(
+            db.UserProfilesCompanion.insert(
+              userId: profile.userId,
+              name: Value(profile.name),
+              username: Value(profile.username),
+              email: Value(profile.email),
+              phone: Value(profile.phone),
+              regionId: Value(profile.regionId),
+
+              // Simpan URL avatar dari Supabase.
+              avatarUrl: Value(profile.avatarUrl),
+
+              // Pertahankan file avatar lokal.
+              avatarLocalPath: Value(existing?.avatarLocalPath),
+
+              isContributor: Value(profile.isContributor),
+              isAdmin: Value(profile.isAdmin),
+            ),
+          );
+    });
   }
 
-  // Ambil profil
+  // AMBIL PROFIL DARI DRIFT
   Future<model.UserProfile?> getUserProfile(String userId) async {
     final query = database.select(database.userProfiles)
       ..where((table) => table.userId.equals(userId));
@@ -42,12 +57,14 @@ class AuthLocalDataSource {
       email: result.email,
       phone: result.phone,
       regionId: result.regionId,
+      avatarUrl: result.avatarUrl,
+      avatarLocalPath: result.avatarLocalPath,
       isContributor: result.isContributor,
       isAdmin: result.isAdmin,
     );
   }
 
-  // Hapus profil
+  // HAPUS PROFIL
   Future<void> clearUserProfile(String userId) async {
     await (database.delete(
       database.userProfiles,

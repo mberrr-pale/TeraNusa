@@ -14,7 +14,6 @@ import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_dialog.dart';
 
 import '../providers/auth_provider.dart';
-// import '../../../../data/models/user_profile_model.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -28,6 +27,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -36,24 +36,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  // void redirectByRole(UserProfile profile) {
-  //   if (profile.isAdmin) {
-  //     context.go(AppRoutes.adminHome);
-  //   } else if (profile.isContributor) {
-  //     context.go(AppRoutes.contributorHome);
-  //   } else {
-  //     context.go(AppRoutes.home);
-  //   }
-  // }
-
-  //navigasi sementara untuk pengujian
-  void redirectAfterLogin() {
-    context.go(AppRoutes.home);
-  }
-
   // LOGIN
   Future<void> login() async {
+    if (_isSubmitting) return;
+
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
 
     try {
       final profile = await ref
@@ -65,16 +54,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (!mounted) return;
 
-      AppDialog.show(
-        context,
-        type: AppDialogType.success,
-        title: 'Login berhasil',
-        message: 'Selamat datang kembali, ${profile.name}.',
-      );
+      context.go(AppRoutes.home);
 
-      // redirectByRole(profile);
-      //untuk pengujian
-      redirectAfterLogin();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        AppDialog.show(
+          context,
+          type: AppDialogType.success,
+          title: 'Login berhasil',
+          message: 'Selamat datang kembali, ${profile.name}.',
+        );
+      });
     } on AuthException catch (e) {
       if (!mounted) return;
 
@@ -94,14 +85,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         message: 'Tidak dapat memuat profil akun. Silakan coba kembali.',
         duration: const Duration(seconds: 5),
       );
-
-      debugPrint('LOGIN ERROR: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authProvider).isLoading;
+    final isLoading = ref.watch(
+      authProvider.select((state) => state.isLoading),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -131,7 +126,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             if (context.canPop()) {
                               context.pop();
                             } else {
-                              context.go(AppRoutes.register);
+                              context.go(AppRoutes.home);
                             }
                           },
                           borderRadius: BorderRadius.circular(12),
@@ -172,7 +167,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ],
                           ),
                           child: const Icon(
-                            Icons.spa_outlined,
+                            Icons.travel_explore,
                             color: Colors.white,
                             size: 34,
                           ),
@@ -258,35 +253,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 12),
 
                       // FORGOT PASSWORD
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            // TODO: Navigasi ke halaman lupa password
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Lupa kata sandi?',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
+                      // Align(
+                      //   alignment: Alignment.centerRight,
+                      //   child: TextButton(
+                      //     onPressed: () {
+                      //       // TODO: Navigasi ke halaman lupa password
+                      //     },
+                      //     style: TextButton.styleFrom(
+                      //       padding: EdgeInsets.zero,
+                      //       minimumSize: Size.zero,
+                      //       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      //     ),
+                      //     child: const Text(
+                      //       'Lupa kata sandi?',
+                      //       style: TextStyle(
+                      //         fontSize: 12,
+                      //         color: AppColors.primary,
+                      //         fontWeight: FontWeight.w600,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
 
-                      const SizedBox(height: 18),
+                      // const SizedBox(height: 18),
 
                       // LOGIN BUTTON
                       AppButton(
                         label: 'Masuk',
                         icon: Icons.arrow_forward,
-                        isLoading: isLoading,
+                        isLoading: isLoading || _isSubmitting,
                         onPressed: login,
                       ),
 

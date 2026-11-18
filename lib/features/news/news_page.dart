@@ -366,7 +366,7 @@ class _NewsPageState extends State<NewsPage> {
               ),
             ),
 
-            const AppBottomNavigation(currentIndex: 2),
+            const AppBottomNavigation(),
           ],
         ),
       ),

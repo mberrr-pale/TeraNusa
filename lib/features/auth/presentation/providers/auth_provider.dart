@@ -78,9 +78,12 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
         case AuthChangeEvent.signedOut:
           state = const AsyncData(null);
           break;
-
         case AuthChangeEvent.userUpdated:
-          refreshProfile(data.session?.user.id);
+          final userId = data.session?.user.id;
+
+          if (userId != null) {
+            refreshProfile(userId);
+          }
           break;
 
         default:
@@ -103,13 +106,22 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
   // REGISTER
   // ==========================================================
 
-  Future<void> register(RegisterRequest request) async {
+  Future<UserProfile> register(RegisterRequest request) async {
     state = const AsyncLoading();
 
-    state = await AsyncValue.guard(() async {
-      await _repository.register(request);
-      return null;
-    });
+    try {
+      // Register dan dapatkan UserProfile dari repository.
+      final profile = await _repository.register(request);
+
+      // Update state Riverpod.
+      state = AsyncData(profile);
+
+      // Kembalikan profile ke RegisterPage.
+      return profile;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
   }
 
   // ==========================================================

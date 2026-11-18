@@ -9,6 +9,13 @@ class AppButton extends StatelessWidget {
   final IconData? icon;
   final bool isLoading;
   final bool isExpanded;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final Color? borderColor;
+  final double? height;
+  final Color? textColor;
+  final Color? disabledBackgroundColor;
+  final Color? disabledForegroundColor;
 
   const AppButton({
     super.key,
@@ -17,6 +24,13 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.isLoading = false,
     this.isExpanded = true,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.borderColor,
+    this.height,
+    this.textColor,
+    this.disabledBackgroundColor,
+    this.disabledForegroundColor,
   });
 
   @override
@@ -24,12 +38,27 @@ class AppButton extends StatelessWidget {
     final button = ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
+        backgroundColor: backgroundColor ?? AppColors.primary,
+        foregroundColor: foregroundColor ?? AppColors.white,
+
+        disabledBackgroundColor:
+            disabledBackgroundColor ??
+            (backgroundColor ?? AppColors.primary).withValues(alpha: 0.5),
+
+        disabledForegroundColor:
+            disabledForegroundColor ??
+            (foregroundColor ?? AppColors.white).withValues(alpha: 0.6),
+
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        minimumSize: Size(0, height ?? 48),
+
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: borderColor != null
+              ? BorderSide(color: borderColor!)
+              : BorderSide.none,
+        ),
       ),
       child: isLoading
           ? const SizedBox(
@@ -44,10 +73,19 @@ class AppButton extends StatelessWidget {
               mainAxisSize: isExpanded ? MainAxisSize.max : MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(label, style: AppTextStyles.button),
+                Text(
+                  label,
+                  style: AppTextStyles.button.copyWith(
+                    color: textColor ?? foregroundColor ?? AppColors.white,
+                  ),
+                ),
                 if (icon != null) ...[
-                  Icon(icon, size: 18),
                   const SizedBox(width: 8),
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: foregroundColor ?? AppColors.white,
+                  ),
                 ],
               ],
             ),

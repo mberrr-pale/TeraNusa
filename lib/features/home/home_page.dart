@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/constants/app_routes.dart';
+import '../../../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_header.dart';
@@ -17,15 +18,17 @@ import '../../data/models/opportunity.dart';
 import '../../data/repositories/opportunity_repository.dart';
 import '../../data/models/news.dart';
 import '../../data/repositories/news_repository.dart';
+import '../../core/widgets/guest_access_guard.dart';
+import '../auth/presentation/providers/auth_provider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final OpportunityRepository _repository = OpportunityRepository(
     Supabase.instance.client,
   );
@@ -60,6 +63,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
+    final user = authState.asData?.value;
+    final isGuest = !authState.isLoading && !authState.hasError && user == null;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -78,8 +86,8 @@ class _HomePageState extends State<HomePage> {
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
                           _buildRegionBanner(),
-                          const SizedBox(height: 11),
-                          _buildGuestCard(),
+                          if (isGuest) const SizedBox(height: 11),
+                          if (isGuest) _buildGuestCard(),
                           const SizedBox(height: 22),
                           _buildSectionHeader(),
                           const SizedBox(height: 11),
@@ -102,7 +110,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: const AppBottomNavigation(currentIndex: 0),
+      bottomNavigationBar: const AppBottomNavigation(),
     );
   }
 
@@ -228,66 +236,65 @@ class _HomePageState extends State<HomePage> {
   // GUEST INFORMATION
 
   Widget _buildGuestCard() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: AppColors.border),
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
         borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: AppColors.empowermentBackground,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.person_outline,
-              color: AppColors.primary,
-              size: 19,
-            ),
+        onTap: () async {
+          final allowed = await GuestAccessGuard.check(context, ref);
+          if (!allowed || !context.mounted) return;
+        },
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(14),
           ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Kamu sedang menjelajah sebagai tamu',
-                  style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.empowermentBackground,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  'Masuk untuk menyimpan dan berkontribusi',
-                  style: AppTextStyles.secondary.copyWith(fontSize: 11),
+                child: const Icon(
+                  Icons.person_outline,
+                  color: AppColors.primary,
+                  size: 19,
                 ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              showPageInfo(
-                'Informasi',
-                'Fitur login masih dalam tahap pengembangan.',
-              );
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              'Masuk',
-              style: AppTextStyles.button.copyWith(
-                color: AppColors.primary,
-                fontSize: 14,
               ),
-            ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kamu sedang menjelajah sebagai tamu',
+                      style: AppTextStyles.cardTitle.copyWith(fontSize: 12),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Masuk untuk menyimpan dan berkontribusi',
+                      style: AppTextStyles.secondary.copyWith(fontSize: 10),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'Masuk',
+                style: AppTextStyles.button.copyWith(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 3),
+              Icon(Icons.chevron_right, size: 16, color: AppColors.primary),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

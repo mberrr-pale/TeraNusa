@@ -54,6 +54,11 @@ dependencies:
   drift: ^2.35.4
   drift_flutter: ^0.3.1
   sqlite3: ^3.9.1
+  internet_connection_checker_plus: ^3.1.2
+  path_provider: ^2.1.6
+  path: ^1.9.1
+  image_cropper: ^13.0.0
+  mime: ^2.1.0
 
 dev_dependencies:
   flutter_test:

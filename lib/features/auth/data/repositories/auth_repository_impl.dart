@@ -35,28 +35,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   // GET PROFILE: LOCAL FIRST
   @override
-  @override
   Future<UserProfile?> getProfile(String userId) async {
-    // 1. Periksa database lokal.
-    final localProfile = await localDataSource.getUserProfile(userId);
-
-    if (localProfile != null) {
-      return localProfile;
-    }
-
-    // 2. Jika belum tersedia, ambil dari Supabase.
-    try {
-      final remoteProfile = await remoteDataSource.getUserProfile(userId);
-
-      // 3. Simpan ke database lokal.
-      await localDataSource.saveUserProfile(remoteProfile);
-
-      return remoteProfile;
-    } catch (e) {
-      // Jika profil lokal tidak tersedia dan server gagal,
-      // propagasikan error agar tidak dianggap sebagai logout.
-      rethrow;
-    }
+    return localDataSource.getUserProfile(userId);
   }
 
   // SYNC PROFILE: REMOTE
@@ -71,23 +51,38 @@ class AuthRepositoryImpl implements AuthRepository {
 
   // REGISTER ONLINE
   @override
-  Future<void> register(RegisterRequest request) async {
-    await remoteDataSource.register(request);
+  Future<UserProfile> register(RegisterRequest request) async {
+    // 1. Register ke Supabase Auth
+    final response = await remoteDataSource.register(request);
+
+    // 2. Ambil user ID
+    final user = response.user;
+
+    if (user == null) {
+      throw Exception('User tidak ditemukan setelah registrasi');
+    }
+
+    // 3. Ambil profile dari tabel profiles
+    final profile = await remoteDataSource.getUserProfile(user.id);
+
+    // 4. Simpan profile ke local database
+    await localDataSource.saveUserProfile(profile);
+
+    // 5. Return profile
+    return profile;
   }
 
-  // LOGOUT LOCAL
+  // LOGOUT CURRENT DEVICE
   @override
   Future<void> logout() async {
     final userId = remoteDataSource.currentUserId;
 
-    try {
-      // Hapus session lokal tanpa membutuhkan internet.
-      await remoteDataSource.logout();
-    } finally {
-      // Tetap bersihkan profile lokal.
-      if (userId != null) {
-        await localDataSource.clearUserProfile(userId);
-      }
+    // Logout hanya pada device saat ini.
+    await remoteDataSource.logout();
+
+    // Hapus cache user pada device saat ini.
+    if (userId != null) {
+      await localDataSource.clearUserProfile(userId);
     }
   }
 }
