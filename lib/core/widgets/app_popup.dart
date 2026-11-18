@@ -166,7 +166,17 @@ class _PopupContentState extends State<_PopupContent> {
 
     _timer?.cancel();
 
-    await widget.onConfirm();
+    try {
+      await widget.onConfirm();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+
+      rethrow;
+    }
   }
 
   @override

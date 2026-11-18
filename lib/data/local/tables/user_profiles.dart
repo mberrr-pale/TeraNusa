@@ -13,6 +13,12 @@ class UserProfiles extends Table {
 
   TextColumn get regionId => text().withDefault(const Constant(''))();
 
+  // URL foto dari Supabase Storage
+  TextColumn get avatarUrl => text().nullable()();
+
+  // Path foto yang disimpan secara lokal
+  TextColumn get avatarLocalPath => text().nullable()();
+
   BoolColumn get isContributor =>
       boolean().withDefault(const Constant(false))();
 

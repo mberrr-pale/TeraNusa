@@ -72,6 +72,28 @@ class $UserProfilesTable extends UserProfiles
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _avatarUrlMeta = const VerificationMeta(
+    'avatarUrl',
+  );
+  @override
+  late final GeneratedColumn<String> avatarUrl = GeneratedColumn<String>(
+    'avatar_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _avatarLocalPathMeta = const VerificationMeta(
+    'avatarLocalPath',
+  );
+  @override
+  late final GeneratedColumn<String> avatarLocalPath = GeneratedColumn<String>(
+    'avatar_local_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isContributorMeta = const VerificationMeta(
     'isContributor',
   );
@@ -110,6 +132,8 @@ class $UserProfilesTable extends UserProfiles
     email,
     phone,
     regionId,
+    avatarUrl,
+    avatarLocalPath,
     isContributor,
     isAdmin,
   ];
@@ -163,6 +187,21 @@ class $UserProfilesTable extends UserProfiles
         regionId.isAcceptableOrUnknown(data['region_id']!, _regionIdMeta),
       );
     }
+    if (data.containsKey('avatar_url')) {
+      context.handle(
+        _avatarUrlMeta,
+        avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta),
+      );
+    }
+    if (data.containsKey('avatar_local_path')) {
+      context.handle(
+        _avatarLocalPathMeta,
+        avatarLocalPath.isAcceptableOrUnknown(
+          data['avatar_local_path']!,
+          _avatarLocalPathMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_contributor')) {
       context.handle(
         _isContributorMeta,
@@ -211,6 +250,14 @@ class $UserProfilesTable extends UserProfiles
         DriftSqlType.string,
         data['${effectivePrefix}region_id'],
       )!,
+      avatarUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_url'],
+      ),
+      avatarLocalPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_local_path'],
+      ),
       isContributor: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_contributor'],
@@ -235,6 +282,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
   final String email;
   final String phone;
   final String regionId;
+  final String? avatarUrl;
+  final String? avatarLocalPath;
   final bool isContributor;
   final bool isAdmin;
   const UserProfile({
@@ -244,6 +293,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     required this.email,
     required this.phone,
     required this.regionId,
+    this.avatarUrl,
+    this.avatarLocalPath,
     required this.isContributor,
     required this.isAdmin,
   });
@@ -256,6 +307,12 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     map['email'] = Variable<String>(email);
     map['phone'] = Variable<String>(phone);
     map['region_id'] = Variable<String>(regionId);
+    if (!nullToAbsent || avatarUrl != null) {
+      map['avatar_url'] = Variable<String>(avatarUrl);
+    }
+    if (!nullToAbsent || avatarLocalPath != null) {
+      map['avatar_local_path'] = Variable<String>(avatarLocalPath);
+    }
     map['is_contributor'] = Variable<bool>(isContributor);
     map['is_admin'] = Variable<bool>(isAdmin);
     return map;
@@ -269,6 +326,12 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       email: Value(email),
       phone: Value(phone),
       regionId: Value(regionId),
+      avatarUrl: avatarUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarUrl),
+      avatarLocalPath: avatarLocalPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarLocalPath),
       isContributor: Value(isContributor),
       isAdmin: Value(isAdmin),
     );
@@ -286,6 +349,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       email: serializer.fromJson<String>(json['email']),
       phone: serializer.fromJson<String>(json['phone']),
       regionId: serializer.fromJson<String>(json['regionId']),
+      avatarUrl: serializer.fromJson<String?>(json['avatarUrl']),
+      avatarLocalPath: serializer.fromJson<String?>(json['avatarLocalPath']),
       isContributor: serializer.fromJson<bool>(json['isContributor']),
       isAdmin: serializer.fromJson<bool>(json['isAdmin']),
     );
@@ -300,6 +365,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       'email': serializer.toJson<String>(email),
       'phone': serializer.toJson<String>(phone),
       'regionId': serializer.toJson<String>(regionId),
+      'avatarUrl': serializer.toJson<String?>(avatarUrl),
+      'avatarLocalPath': serializer.toJson<String?>(avatarLocalPath),
       'isContributor': serializer.toJson<bool>(isContributor),
       'isAdmin': serializer.toJson<bool>(isAdmin),
     };
@@ -312,6 +379,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     String? email,
     String? phone,
     String? regionId,
+    Value<String?> avatarUrl = const Value.absent(),
+    Value<String?> avatarLocalPath = const Value.absent(),
     bool? isContributor,
     bool? isAdmin,
   }) => UserProfile(
@@ -321,6 +390,10 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     email: email ?? this.email,
     phone: phone ?? this.phone,
     regionId: regionId ?? this.regionId,
+    avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
+    avatarLocalPath: avatarLocalPath.present
+        ? avatarLocalPath.value
+        : this.avatarLocalPath,
     isContributor: isContributor ?? this.isContributor,
     isAdmin: isAdmin ?? this.isAdmin,
   );
@@ -332,6 +405,10 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       email: data.email.present ? data.email.value : this.email,
       phone: data.phone.present ? data.phone.value : this.phone,
       regionId: data.regionId.present ? data.regionId.value : this.regionId,
+      avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
+      avatarLocalPath: data.avatarLocalPath.present
+          ? data.avatarLocalPath.value
+          : this.avatarLocalPath,
       isContributor: data.isContributor.present
           ? data.isContributor.value
           : this.isContributor,
@@ -348,6 +425,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
           ..write('email: $email, ')
           ..write('phone: $phone, ')
           ..write('regionId: $regionId, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('avatarLocalPath: $avatarLocalPath, ')
           ..write('isContributor: $isContributor, ')
           ..write('isAdmin: $isAdmin')
           ..write(')'))
@@ -362,6 +441,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     email,
     phone,
     regionId,
+    avatarUrl,
+    avatarLocalPath,
     isContributor,
     isAdmin,
   );
@@ -375,6 +456,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
           other.email == this.email &&
           other.phone == this.phone &&
           other.regionId == this.regionId &&
+          other.avatarUrl == this.avatarUrl &&
+          other.avatarLocalPath == this.avatarLocalPath &&
           other.isContributor == this.isContributor &&
           other.isAdmin == this.isAdmin);
 }
@@ -386,6 +469,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
   final Value<String> email;
   final Value<String> phone;
   final Value<String> regionId;
+  final Value<String?> avatarUrl;
+  final Value<String?> avatarLocalPath;
   final Value<bool> isContributor;
   final Value<bool> isAdmin;
   final Value<int> rowid;
@@ -396,6 +481,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     this.email = const Value.absent(),
     this.phone = const Value.absent(),
     this.regionId = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.avatarLocalPath = const Value.absent(),
     this.isContributor = const Value.absent(),
     this.isAdmin = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -407,6 +494,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     this.email = const Value.absent(),
     this.phone = const Value.absent(),
     this.regionId = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.avatarLocalPath = const Value.absent(),
     this.isContributor = const Value.absent(),
     this.isAdmin = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -418,6 +507,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     Expression<String>? email,
     Expression<String>? phone,
     Expression<String>? regionId,
+    Expression<String>? avatarUrl,
+    Expression<String>? avatarLocalPath,
     Expression<bool>? isContributor,
     Expression<bool>? isAdmin,
     Expression<int>? rowid,
@@ -429,6 +520,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
       if (email != null) 'email': email,
       if (phone != null) 'phone': phone,
       if (regionId != null) 'region_id': regionId,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
+      if (avatarLocalPath != null) 'avatar_local_path': avatarLocalPath,
       if (isContributor != null) 'is_contributor': isContributor,
       if (isAdmin != null) 'is_admin': isAdmin,
       if (rowid != null) 'rowid': rowid,
@@ -442,6 +535,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     Value<String>? email,
     Value<String>? phone,
     Value<String>? regionId,
+    Value<String?>? avatarUrl,
+    Value<String?>? avatarLocalPath,
     Value<bool>? isContributor,
     Value<bool>? isAdmin,
     Value<int>? rowid,
@@ -453,6 +548,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       regionId: regionId ?? this.regionId,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      avatarLocalPath: avatarLocalPath ?? this.avatarLocalPath,
       isContributor: isContributor ?? this.isContributor,
       isAdmin: isAdmin ?? this.isAdmin,
       rowid: rowid ?? this.rowid,
@@ -480,6 +577,12 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     if (regionId.present) {
       map['region_id'] = Variable<String>(regionId.value);
     }
+    if (avatarUrl.present) {
+      map['avatar_url'] = Variable<String>(avatarUrl.value);
+    }
+    if (avatarLocalPath.present) {
+      map['avatar_local_path'] = Variable<String>(avatarLocalPath.value);
+    }
     if (isContributor.present) {
       map['is_contributor'] = Variable<bool>(isContributor.value);
     }
@@ -501,6 +604,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
           ..write('email: $email, ')
           ..write('phone: $phone, ')
           ..write('regionId: $regionId, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('avatarLocalPath: $avatarLocalPath, ')
           ..write('isContributor: $isContributor, ')
           ..write('isAdmin: $isAdmin, ')
           ..write('rowid: $rowid')
@@ -528,6 +633,8 @@ typedef $$UserProfilesTableCreateCompanionBuilder =
       Value<String> email,
       Value<String> phone,
       Value<String> regionId,
+      Value<String?> avatarUrl,
+      Value<String?> avatarLocalPath,
       Value<bool> isContributor,
       Value<bool> isAdmin,
       Value<int> rowid,
@@ -540,6 +647,8 @@ typedef $$UserProfilesTableUpdateCompanionBuilder =
       Value<String> email,
       Value<String> phone,
       Value<String> regionId,
+      Value<String?> avatarUrl,
+      Value<String?> avatarLocalPath,
       Value<bool> isContributor,
       Value<bool> isAdmin,
       Value<int> rowid,
@@ -581,6 +690,16 @@ class $$UserProfilesTableFilterComposer
 
   ColumnFilters<String> get regionId => $composableBuilder(
     column: $table.regionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarUrl => $composableBuilder(
+    column: $table.avatarUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarLocalPath => $composableBuilder(
+    column: $table.avatarLocalPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -634,6 +753,16 @@ class $$UserProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get avatarUrl => $composableBuilder(
+    column: $table.avatarUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get avatarLocalPath => $composableBuilder(
+    column: $table.avatarLocalPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isContributor => $composableBuilder(
     column: $table.isContributor,
     builder: (column) => ColumnOrderings(column),
@@ -671,6 +800,14 @@ class $$UserProfilesTableAnnotationComposer
 
   GeneratedColumn<String> get regionId =>
       $composableBuilder(column: $table.regionId, builder: (column) => column);
+
+  GeneratedColumn<String> get avatarUrl =>
+      $composableBuilder(column: $table.avatarUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get avatarLocalPath => $composableBuilder(
+    column: $table.avatarLocalPath,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isContributor => $composableBuilder(
     column: $table.isContributor,
@@ -718,6 +855,8 @@ class $$UserProfilesTableTableManager
                 Value<String> email = const Value.absent(),
                 Value<String> phone = const Value.absent(),
                 Value<String> regionId = const Value.absent(),
+                Value<String?> avatarUrl = const Value.absent(),
+                Value<String?> avatarLocalPath = const Value.absent(),
                 Value<bool> isContributor = const Value.absent(),
                 Value<bool> isAdmin = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -728,6 +867,8 @@ class $$UserProfilesTableTableManager
                 email: email,
                 phone: phone,
                 regionId: regionId,
+                avatarUrl: avatarUrl,
+                avatarLocalPath: avatarLocalPath,
                 isContributor: isContributor,
                 isAdmin: isAdmin,
                 rowid: rowid,
@@ -740,6 +881,8 @@ class $$UserProfilesTableTableManager
                 Value<String> email = const Value.absent(),
                 Value<String> phone = const Value.absent(),
                 Value<String> regionId = const Value.absent(),
+                Value<String?> avatarUrl = const Value.absent(),
+                Value<String?> avatarLocalPath = const Value.absent(),
                 Value<bool> isContributor = const Value.absent(),
                 Value<bool> isAdmin = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -750,6 +893,8 @@ class $$UserProfilesTableTableManager
                 email: email,
                 phone: phone,
                 regionId: regionId,
+                avatarUrl: avatarUrl,
+                avatarLocalPath: avatarLocalPath,
                 isContributor: isContributor,
                 isAdmin: isAdmin,
                 rowid: rowid,
