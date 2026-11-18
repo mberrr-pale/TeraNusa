@@ -397,10 +397,9 @@ class _HomePageState extends State<HomePage> {
                   regionName:
                       opportunity.regionName ?? 'Wilayah tidak diketahui',
                   onTap: () {
-                    showPageInfo(
-                      'Detail Peluang',
-                      'Halaman detail peluang sedang '
-                          'dalam tahap pengembangan.',
+                    context.push(
+                      AppRoutes.opportunityDetail,
+                      extra: opportunity,
                     );
                   },
                   onBookmarkTap: () {

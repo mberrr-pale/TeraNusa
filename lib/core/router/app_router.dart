@@ -13,6 +13,8 @@ import '../../features/home/home_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../../features/search_filter/opportunity_page.dart';
 import '../../features/news/news_page.dart';
+import '../../features/opportunity_detail/opportunity_detail_page.dart';
+import '../../data/models/opportunity.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -96,6 +98,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'opportunities',
         builder: (context, state) {
           return const OpportunityPage();
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.opportunityDetail,
+        name: 'opportunityDetail',
+        builder: (context, state) {
+          final opportunity = state.extra as Opportunity;
+
+          return OpportunityDetailPage(opportunity: opportunity);
         },
       ),
 

@@ -12,6 +12,10 @@ class AppRoutes {
   static const String opportunities = '/opportunities';
   static const String news = '/news';
 
+  // Page
+  static const String opportunityDetail = '/opportunity-detail';
+  
+
   // Profile
   static const String profile = '/profile';
 }
