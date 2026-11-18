@@ -76,12 +76,8 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
     final subscription = _supabase.auth.onAuthStateChange.listen((data) {
       switch (data.event) {
         case AuthChangeEvent.signedOut:
-        case AuthChangeEvent.userDeleted:
           state = const AsyncData(null);
           break;
-
-        case AuthChangeEvent.signedIn:
-        case AuthChangeEvent.tokenRefreshed:
         case AuthChangeEvent.userUpdated:
           final userId = data.session?.user.id;
 

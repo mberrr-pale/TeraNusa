@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_routes.dart';
-import '../../../../core/widgets/app_popup.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
 class GuestAccessGuard {
@@ -31,13 +31,13 @@ class GuestAccessGuard {
     // User adalah guest.
     if (!context.mounted) return false;
 
-    await AppPopUp.show(
-      context: context,
-      type: AppPopupType.warning,
+    await AppDialog.show(
+      context,
+      type: AppDialogType.warning,
       title: 'Login Diperlukan',
       message: 'Silakan login terlebih dahulu untuk menggunakan fitur ini.',
-      confirmText: 'Login',
-      cancelText: 'Nanti',
+      confirmLabel: 'Login',
+      cancelLabel: 'Nanti',
       barrierDismissible: true,
       onConfirm: () {
         if (context.mounted) {

@@ -9,12 +9,7 @@ class NewsCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double width;
 
-  const NewsCard({
-    super.key,
-    required this.news, 
-    this.onTap,
-    this.width = 170,
-  });
+  const NewsCard({super.key, required this.news, this.onTap, this.width = 170});
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +38,24 @@ class NewsCard extends StatelessWidget {
             SizedBox(
               height: 120,
               width: double.infinity,
-              child: Image.asset(
+              child: Image.network(
                 news.imageUrl,
                 fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+
+                  return Container(
+                    color: AppColors.background,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                },
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: AppColors.background,
@@ -60,7 +70,6 @@ class NewsCard extends StatelessWidget {
                 },
               ),
             ),
-
             // NEWS INFORMATION
             Padding(
               padding: const EdgeInsets.all(11),
@@ -72,7 +81,7 @@ class NewsCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.secondary.copyWith(
-                      fontSize: 9,
+                      fontSize: 10,
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                     ),

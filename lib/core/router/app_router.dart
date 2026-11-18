@@ -10,6 +10,8 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/home_page.dart';
+import '../../features/search_filter/opportunity_page.dart';
+import '../../features/news/news_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 
 // Router Refresh Provider
@@ -33,7 +35,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: AppRoutes.home,
 
     navigatorKey: AppRouter.rootNavigatorKey,
-
     refreshListenable: refreshNotifier,
 
     redirect: (context, state) {
@@ -60,7 +61,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Halaman yang boleh diakses tanpa login.
       final isGuestAllowed =
           currentLocation == AppRoutes.home ||
-          currentLocation == AppRoutes.home; // perlu diubah
+          currentLocation == AppRoutes.opportunities ||
+          currentLocation == AppRoutes.news;
 
       final isPublicPage = isLogin || isRegister || isGuestAllowed;
 
@@ -100,6 +102,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'dashboard',
         builder: (context, state) {
           return const HomePage();
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.opportunities,
+        name: 'opportunities',
+        builder: (context, state) {
+          return const OpportunityPage();
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.news,
+        name: 'news',
+        builder: (context, state) {
+          return const NewsPage();
         },
       ),
 

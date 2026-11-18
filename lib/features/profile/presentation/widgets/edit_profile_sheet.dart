@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/app_popup.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../providers/profile_provider.dart';
 import '../../data/models/profile_request.dart';
+import '../../../../data/models/user_profile_model.dart';
 
 class EditProfileSheet extends ConsumerStatefulWidget {
   const EditProfileSheet({super.key});
@@ -35,7 +36,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
   // ================= INITIALIZE PROFILE =================
 
-  void _initializeProfile(profile) {
+  void _initializeProfile(UserProfile? profile) {
     if (profile == null || _initialized) return;
 
     _nameController.text = profile.name;
@@ -71,12 +72,12 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
       ref.invalidate(profileProvider);
 
       // Success popup
-      await AppPopUp.show(
-        context: context,
-        type: AppPopupType.success,
+      await AppDialog.show(
+        context,
+        type: AppDialogType.success,
         title: 'Berhasil!',
         message: 'Profil berhasil diperbarui.',
-        confirmText: 'OK',
+        confirmLabel: 'OK',
       );
 
       if (!mounted) return;
@@ -89,12 +90,12 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
       if (!mounted) return;
 
       // Error popup
-      await AppPopUp.show(
-        context: context,
-        type: AppPopupType.error,
+      await AppDialog.show(
+        context,
+        type: AppDialogType.error,
         title: 'Gagal!',
         message: 'Gagal memperbarui profil: $e',
-        confirmText: 'Coba Lagi',
+        confirmLabel: 'Coba Lagi',
       );
     } finally {
       if (mounted) {

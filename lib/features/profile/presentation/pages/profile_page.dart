@@ -9,7 +9,8 @@ import '../../../../core/constants/app_routes.dart';
 import '../../../../core/providers/internet_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_header.dart';
-import '../../../../core/widgets/app_popup.dart';
+import '../../../../core/widgets/app_bottom_navigation.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 import '../../../../data/models/user_profile_model.dart';
 
@@ -23,11 +24,9 @@ import '../widgets/change_password_sheet.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_menu.dart';
 import '../widgets/profile_logout_button.dart';
-import '../widgets/profile_bottom_navigation.dart';
 
 import '../widgets/avatar_preview_dialog.dart';
 import '../widgets/avatar_options_sheet.dart';
-import '../widgets/avatar_info_dialog.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -109,10 +108,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
 
       // BOTTOM NAVIGATION
-      bottomNavigationBar: ProfileBottomNavigation(
-        currentIndex: 3,
-        onTap: _onNavigationTap,
-      ),
+      bottomNavigationBar: const AppBottomNavigation(),
     );
   }
 
@@ -267,14 +263,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // ================= OFFLINE INFO =================
 
   void _showOfflineInfo() {
-    AppPopUp.show(
-      context: context,
+    AppDialog.show(
+      context,
       title: 'Fitur Tidak Tersedia',
       message:
           'Fitur ini membutuhkan koneksi internet. '
           'Silakan periksa koneksi internet kamu '
           'dan coba kembali.',
-      type: AppPopupType.warning,
+      type: AppDialogType.warning,
     );
   }
 
@@ -332,13 +328,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // ================= LOGOUT =================
 
   Future<void> _logout() async {
-    await AppPopUp.show(
-      context: context,
+    await AppDialog.show(
+      context,
       title: 'Konfirmasi Logout',
       message: 'Apakah kamu yakin ingin keluar dari akun?',
-      type: AppPopupType.warning,
-      confirmText: 'Ya, Logout',
-      cancelText: 'Batal',
+      type: AppDialogType.warning,
+      confirmLabel: 'Ya, Logout',
+      cancelLabel: 'Batal',
       onConfirm: () async {
         try {
           await ref.read(authProvider.notifier).logout();
@@ -349,56 +345,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         } catch (e) {
           if (!mounted) return;
 
-          await AppPopUp.show(
-            context: context,
+          await AppDialog.show(
+            context,
             title: 'Logout Gagal',
             message:
                 'Terjadi kesalahan saat keluar dari akun. '
                 'Silakan coba kembali.',
-            type: AppPopupType.error,
+            type: AppDialogType.error,
+            confirmLabel: 'Coba Lagi',
           );
         }
-      },
-    );
-  }
-
-  // ================= BOTTOM NAVIGATION =================
-
-  void _onNavigationTap(int index) {
-    switch (index) {
-      case 0:
-        context.go(AppRoutes.home);
-        break;
-
-      case 1:
-        _showPageInfo('Kategori');
-        break;
-
-      case 2:
-        _showPageInfo('Tersimpan');
-        break;
-
-      case 3:
-        break;
-    }
-  }
-
-  void _showPageInfo(String pageName) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(pageName),
-          content: Text('Halaman $pageName sedang dalam tahap pengembangan.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Mengerti'),
-            ),
-          ],
-        );
       },
     );
   }

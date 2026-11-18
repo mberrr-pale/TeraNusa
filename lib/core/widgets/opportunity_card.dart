@@ -151,7 +151,7 @@ class OpportunityCard extends StatelessWidget {
                           regionName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.secondary.copyWith(fontSize: 8),
+                          style: AppTextStyles.secondary.copyWith(fontSize: 12),
                         ),
                       ),
                     ],
@@ -170,7 +170,7 @@ class OpportunityCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         _getTimeRemaining(opportunity.endDate),
-                        style: AppTextStyles.secondary.copyWith(fontSize: 8),
+                        style: AppTextStyles.secondary.copyWith(fontSize: 12),
                       ),
                       if (opportunity.source != null &&
                           opportunity.source!.isNotEmpty) ...[
@@ -187,7 +187,7 @@ class OpportunityCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.secondary.copyWith(
-                              fontSize: 8,
+                              fontSize: 12,
                             ),
                           ),
                         ),

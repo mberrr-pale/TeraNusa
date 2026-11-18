@@ -44,4 +44,34 @@ class AppColors {
   // Warna pendukung
   static const Color bannerText = Color(0xFF47744A);
   static const Color cardShadow = Color(0xFF20493A);
+
+  static Color categoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'lowongan':
+        return job;
+      case 'event':
+        return event;
+      case 'pemberdayaan':
+        return empowerment;
+      case 'produk_jasa':
+        return product;
+      default:
+        return secondaryText;
+    }
+  }
+
+  static Color categoryBackground(String category) {
+    switch (category.toLowerCase()) {
+      case 'lowongan':
+        return jobBackground;
+      case 'event':
+        return eventBackground;
+      case 'pemberdayaan':
+        return empowermentBackground;
+      case 'produk_jasa':
+        return productBackground;
+      default:
+        return border;
+    }
+  }
 }

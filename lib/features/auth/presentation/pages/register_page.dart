@@ -10,8 +10,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_password_field.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_section_header.dart';
-import '../../../../core/widgets/app_popup.dart';
-import '../../../../data/models/user_profile_model.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../region/presentation/providers/region_provider.dart';
 import '../../../../data/models/region_model.dart';
 
@@ -59,21 +58,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (selectedRegionId == null) {
-      AppPopUp.show(
-        context: context,
+      AppDialog.show(
+        context,
         title: 'Wilayah belum dipilih',
         message: 'Silakan pilih wilayah utama terlebih dahulu.',
-        type: AppPopupType.warning,
+        type: AppDialogType.warning,
       );
       return;
     }
 
     if (!isAgreed) {
-      AppPopUp.show(
-        context: context,
+      AppDialog.show(
+        context,
         title: 'Perhatian',
         message: 'Silakan setujui ketentuan terlebih dahulu.',
-        type: AppPopupType.warning,
+        type: AppDialogType.warning,
       );
       return;
     }
@@ -95,29 +94,33 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
       if (!mounted) return;
 
-      AppPopUp.show(
-        context: context,
-        type: AppPopupType.success,
-        title: 'Registrasi berhasil',
-        message: 'Selamat datang di TeraNusa, ${profile.name}.',
-      );
-
       context.go(AppRoutes.home);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        AppDialog.show(
+          context,
+          type: AppDialogType.success,
+          title: 'Registrasi berhasil',
+          message: 'Selamat datang di TeraNusa, ${profile.name}.',
+        );
+      });
     } on AuthException catch (e) {
       if (!mounted) return;
 
-      AppPopUp.show(
-        context: context,
-        type: AppPopupType.error,
+      AppDialog.show(
+        context,
+        type: AppDialogType.error,
         title: 'Registrasi gagal',
         message: e.message,
       );
-    } catch (e, st) {
+    } catch (e) {
       if (!mounted) return;
 
-      AppPopUp.show(
-        context: context,
-        type: AppPopupType.error,
+      AppDialog.show(
+        context,
+        type: AppDialogType.error,
         title: 'Registrasi gagal',
         message: 'Tidak dapat menyelesaikan registrasi. Silakan coba kembali.',
         duration: const Duration(seconds: 8),

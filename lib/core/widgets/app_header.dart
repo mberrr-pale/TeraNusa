@@ -53,13 +53,13 @@ class AppHeader extends StatelessWidget {
                   Text(
                     'TeraNusa',
                     style: AppTextStyles.cardTitle.copyWith(
-                      fontSize: 13,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   Text(
                     'Peluang lokal, lebih dekat',
-                    style: AppTextStyles.secondary.copyWith(fontSize: 8),
+                    style: AppTextStyles.secondary.copyWith(fontSize: 12),
                   ),
                 ],
               ),

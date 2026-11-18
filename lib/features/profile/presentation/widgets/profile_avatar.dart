@@ -96,7 +96,7 @@ class ProfileAvatar extends StatelessWidget {
                 url,
                 key: ValueKey(url),
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _localImage(path),
+                errorBuilder: (_, _, _) => _localImage(path),
               )
             : _localImage(path),
       ),
@@ -112,7 +112,7 @@ class ProfileAvatar extends StatelessWidget {
           file,
           key: ValueKey(path),
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _defaultAvatar(),
+          errorBuilder: (_, _, _) => _defaultAvatar(),
         );
       }
     }

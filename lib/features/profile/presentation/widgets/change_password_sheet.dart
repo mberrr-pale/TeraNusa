@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/app_popup.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../providers/profile_provider.dart';
 import '../../data/models/change_password_request.dart';
 
@@ -56,12 +56,12 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
 
       setState(() => _isLoading = false);
 
-      await AppPopUp.show(
-        context: context,
-        type: AppPopupType.error,
+      await AppDialog.show(
+        context,
+        type: AppDialogType.error,
         title: 'Gagal Mengubah Password',
         message: 'Periksa password saat ini dan coba lagi.',
-        confirmText: 'Mengerti',
+        confirmLabel: 'Mengerti',
       );
 
       return;
@@ -71,12 +71,12 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
 
     setState(() => _isLoading = false);
 
-    await AppPopUp.show(
-      context: context,
-      type: AppPopupType.success,
+    await AppDialog.show(
+      context,
+      type: AppDialogType.success,
       title: 'Password Berhasil Diubah',
       message: 'Silakan login kembali menggunakan password baru.',
-      confirmText: 'Login Kembali',
+      confirmLabel: 'Login Kembali',
       barrierDismissible: false,
       onConfirm: () async {
         // 3. Logout seluruh device

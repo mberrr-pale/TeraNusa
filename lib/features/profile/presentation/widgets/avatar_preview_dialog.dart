@@ -22,7 +22,7 @@ class AvatarPreviewDialog extends StatelessWidget {
   }) {
     return showDialog<void>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.95),
+      barrierColor: Colors.black.withValues(alpha: 0.95),
       builder: (_) => AvatarPreviewDialog(user: user, onEdit: onEdit),
     );
   }
@@ -54,7 +54,7 @@ class AvatarPreviewDialog extends StatelessWidget {
             right: 20,
             child: ElevatedButton.icon(
               onPressed: () {
-                Navigator.pop(context);
+                // Navigator.pop(context);
                 onEdit();
               },
               icon: const Icon(Icons.edit),
@@ -81,7 +81,7 @@ class AvatarPreviewDialog extends StatelessWidget {
       return Image.network(
         avatarUrl,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) {
+        errorBuilder: (_, _, _) {
           return _buildLocalImage();
         },
       );
