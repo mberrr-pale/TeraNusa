@@ -1,6 +1,8 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/supabase_config.dart';
 import '../../../../core/providers/database_provider.dart';
@@ -48,51 +50,198 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
 
   SupabaseClient get _supabase => ref.read(supabaseProvider);
 
-  @override
+  StreamSubscription<AuthState>? _authSubscription;
+
+  bool _disposed = false;
+  String? _syncingUserId;
+
   @override
   Future<UserProfile?> build() async {
-    final subscription = _supabase.auth.onAuthStateChange.listen((data) {
-      final userId = data.session?.user.id;
+    _disposed = false;
 
-      if (userId == null) {
-        state = const AsyncData(null);
-      } else {
-        // Ambil profile dari database lokal.
-        loadLocalProfile(userId);
-      }
+    // 1. Listen perubahan autentikasi.
+    _authSubscription = _supabase.auth.onAuthStateChange.listen(
+      _handleAuthChange,
+      onError: (error, stackTrace) {
+        debugPrint('AUTH STREAM ERROR: $error');
+      },
+    );
+
+    ref.onDispose(() {
+      _disposed = true;
+      _authSubscription?.cancel();
     });
 
-    ref.onDispose(subscription.cancel);
-
-    // Ambil session yang sudah tersimpan.
+    // 2. Periksa session yang sudah dipulihkan.
     final userId = _supabase.auth.currentUser?.id;
 
     if (userId == null) {
       return null;
     }
 
-    // Tidak ada request internet di sini.
-    return _repository.getProfile(userId);
+    // 3. Ambil profile dari SQLite.
+    final localProfile = await _repository.getProfile(userId);
+
+    if (_disposed) return null;
+
+    // 4. Jika cache tersedia, tampilkan langsung.
+    if (localProfile != null) {
+      // Sinkronisasi tidak memblokir startup.
+      unawaited(refreshProfile(userId));
+
+      return localProfile;
+    }
+
+    // 5. Jika cache belum tersedia, ambil dari server.
+    // Contohnya setelah reinstall aplikasi.
+    try {
+      return await _repository.syncProfile(userId);
+    } catch (e) {
+      debugPrint('INITIAL PROFILE ERROR: $e');
+
+      // Session masih ada, jangan langsung menganggap logout.
+      // State null di sini perlu dibedakan oleh UI dari
+      // kondisi benar-benar belum login.
+      rethrow;
+    }
   }
 
-  Future<void> loadLocalProfile(String userId) async {
+  // AUTH STATE LISTENER
+  void _handleAuthChange(AuthState data) {
+    if (_disposed) return;
+
+    final event = data.event;
+    final userId = data.session?.user.id;
+
+    switch (event) {
+      case AuthChangeEvent.signedOut:
+        state = const AsyncData(null);
+        break;
+
+      case AuthChangeEvent.signedIn:
+        if (userId != null) {
+          unawaited(_handleSignedIn(userId));
+        }
+        break;
+
+      case AuthChangeEvent.userUpdated:
+        if (userId != null) {
+          unawaited(refreshProfile(userId));
+        }
+        break;
+
+      case AuthChangeEvent.tokenRefreshed:
+        // Tidak perlu mengambil profile lagi.
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  // HANDLE LOGIN
+  Future<void> _handleSignedIn(String userId) async {
     try {
       final profile = await _repository.getProfile(userId);
 
+      if (_disposed) return;
+
+      if (profile != null) {
+        state = AsyncData(profile);
+        unawaited(refreshProfile(userId));
+      } else {
+        await refreshProfile(userId);
+      }
+    } catch (e) {
+      debugPrint('SIGNED IN ERROR: $e');
+    }
+  }
+
+  // BACKGROUND PROFILE SYNC
+  Future<void> refreshProfile([String? userId]) async {
+    final id = userId ?? _supabase.auth.currentUser?.id;
+
+    if (id == null || _disposed) return;
+
+    // Hindari request bersamaan untuk user yang sama.
+    if (_syncingUserId == id) return;
+
+    _syncingUserId = id;
+
+    try {
+      final profile = await _repository.syncProfile(id);
+
+      if (_disposed) return;
+
+      // Pastikan session masih aktif dan user belum berganti.
+      if (_supabase.auth.currentSession == null) return;
+
+      if (_supabase.auth.currentUser?.id != id) return;
+
       state = AsyncData(profile);
     } catch (e) {
-      debugPrint('LOCAL PROFILE ERROR: $e');
+      debugPrint('PROFILE SYNC ERROR: $e');
+    } finally {
+      if (_syncingUserId == id) {
+        _syncingUserId = null;
+      }
     }
   }
 
   // REGISTER
-  Future<void> register(RegisterRequest request) async {
+  Future<UserProfile> register(RegisterRequest request) async {
+    if (_disposed) {
+      throw Exception('AuthNotifier sudah disposed.');
+    }
+
     state = const AsyncLoading();
 
-    state = await AsyncValue.guard(() async {
-      await _repository.register(request);
-      return null;
-    });
+    try {
+      // 1. Register dan dapatkan UserProfile.
+      final registeredProfile = await _repository.register(request);
+
+      if (_disposed) return registeredProfile;
+
+      // 2. Periksa session Supabase.
+      var session = _supabase.auth.currentSession;
+
+      // 3. Jika session belum tersedia, lakukan login.
+      if (session == null) {
+        final profile = await _repository.login(
+          email: request.email.trim().toLowerCase(),
+          password: request.password,
+        );
+
+        if (_disposed) return profile;
+
+        session = _supabase.auth.currentSession;
+
+        if (session == null) {
+          throw const AuthException(
+            'Session tidak tersedia setelah registrasi.',
+          );
+        }
+
+        state = AsyncData(profile);
+        return profile;
+      }
+
+      // 4. Validasi bahwa session adalah milik user yang baru didaftarkan.
+      if (session.user.id != _supabase.auth.currentUser?.id) {
+        throw const AuthException('Session tidak valid.');
+      }
+
+      // 5. Gunakan profile yang sudah didapatkan dari repository.
+      state = AsyncData(registeredProfile);
+
+      return registeredProfile;
+    } catch (e, st) {
+      if (!_disposed) {
+        state = AsyncError(e, st);
+      }
+
+      rethrow;
+    }
   }
 
   // LOGIN
@@ -105,27 +254,16 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
     try {
       final profile = await _repository.login(email: email, password: password);
 
-      state = AsyncData(profile);
+      if (!_disposed) {
+        state = AsyncData(profile);
+      }
 
       return profile;
     } catch (e, st) {
-      state = AsyncError(e, st);
+      if (!_disposed) {
+        state = AsyncError(e, st);
+      }
       rethrow;
-    }
-  }
-
-  // REFRESH PROFILE
-  Future<void> refreshProfile([String? userId]) async {
-    final id = userId ?? _supabase.auth.currentUser?.id;
-
-    if (id == null) return;
-
-    try {
-      final profile = await _repository.syncProfile(id);
-      state = AsyncData(profile);
-    } catch (e) {
-      // Jangan hapus profile lokal ketika sinkronisasi gagal.
-      debugPrint('PROFILE SYNC ERROR: $e');
     }
   }
 
@@ -135,9 +273,33 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
 
     try {
       await _repository.logout();
-      state = const AsyncData(null);
+
+      if (!_disposed) {
+        state = const AsyncData(null);
+      }
     } catch (e, st) {
-      state = AsyncError(e, st);
+      if (!_disposed) {
+        state = AsyncError(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  // LOGOUT ALL DEVICES
+  Future<void> logoutAllDevices() async {
+    try {
+      await ref.read(authRemoteDataSourceProvider).logoutAllDevices();
+
+      if (!_disposed) {
+        state = const AsyncData(null);
+      }
+    } catch (e, st) {
+      debugPrint('LOGOUT ALL DEVICES ERROR: $e');
+
+      if (!_disposed) {
+        state = AsyncError(e, st);
+      }
+
       rethrow;
     }
   }

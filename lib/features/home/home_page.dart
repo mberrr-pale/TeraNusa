@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/widgets/opportunity_card.dart';
-import '../../data/local/dummy_opportunities.dart';
-import '../../data/models/opportunity.dart';
-import '../../data/repositories/opportunity_repository.dart';
 import '../../core/widgets/states/app_loading.dart';
 import '../../core/widgets/states/app_error.dart';
 import '../../core/widgets/states/app_empty.dart';
 import '../../core/widgets/news_card.dart';
+import '../../core/widgets/guest_access_guard.dart';
+import '../../data/local/dummy_opportunities.dart';
+import '../../data/models/opportunity.dart';
+import '../../data/repositories/opportunity_repository.dart';
 import '../../data/local/dummy_news.dart';
+import '../auth/presentation/providers/auth_provider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final OpportunityRepository _repository = OpportunityRepository();
 
   late Future<List<Opportunity>> _opportunitiesFuture;
@@ -41,6 +46,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
+    final user = authState.asData?.value;
+    final isGuest = !authState.isLoading && !authState.hasError && user == null;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -61,8 +71,8 @@ class _HomePageState extends State<HomePage> {
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
                           _buildRegionBanner(),
-                          const SizedBox(height: 11),
-                          _buildGuestCard(),
+                          if (isGuest) const SizedBox(height: 11),
+                          if (isGuest) _buildGuestCard(),
                           const SizedBox(height: 22),
                           _buildSectionHeader(),
                           const SizedBox(height: 11),
@@ -213,81 +223,65 @@ class _HomePageState extends State<HomePage> {
   // GUEST INFORMATION
 
   Widget _buildGuestCard() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: AppColors.border),
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
         borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: AppColors.empowermentBackground,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.person_outline,
-              color: AppColors.primary,
-              size: 19,
-            ),
+        onTap: () async {
+          final allowed = await GuestAccessGuard.check(context, ref);
+          if (!allowed || !context.mounted) return;
+        },
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(14),
           ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Kamu sedang menjelajah sebagai tamu',
-                  style: AppTextStyles.cardTitle.copyWith(fontSize: 9),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.empowermentBackground,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  'Masuk untuk menyimpan dan berkontribusi',
-                  style: AppTextStyles.secondary.copyWith(fontSize: 8),
+                child: const Icon(
+                  Icons.person_outline,
+                  color: AppColors.primary,
+                  size: 19,
                 ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              showDialog<void>(
-                context: context,
-                builder: (dialogContext) {
-                  return AlertDialog(
-                    title: const Text('Informasi'),
-                    content: const Text(
-                      'Fitur login masih dalam tahap pengembangan.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: const Text('Mengerti'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              'Masuk',
-              style: AppTextStyles.button.copyWith(
-                color: AppColors.primary,
-                fontSize: 10,
               ),
-            ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kamu sedang menjelajah sebagai tamu',
+                      style: AppTextStyles.cardTitle.copyWith(fontSize: 9),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Masuk untuk menyimpan dan berkontribusi',
+                      style: AppTextStyles.secondary.copyWith(fontSize: 8),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'Masuk',
+                style: AppTextStyles.button.copyWith(
+                  color: AppColors.primary,
+                  fontSize: 10,
+                ),
+              ),
+              const SizedBox(width: 3),
+              Icon(Icons.chevron_right, size: 16, color: AppColors.primary),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -619,19 +613,32 @@ class _HomePageState extends State<HomePage> {
       unselectedItemColor: AppColors.secondaryText,
       selectedFontSize: 10,
       unselectedFontSize: 10,
-      onTap: (index) {
+      onTap: (index) async {
         switch (index) {
           case 0:
-            // Sudah berada di halaman Beranda.
+            // Beranda: public access.
             break;
+
           case 1:
             showPageInfo('Kategori');
             break;
+
           case 2:
+            // Tersimpan: membutuhkan login.
+            final allowed = await GuestAccessGuard.check(context, ref);
+
+            if (!allowed || !context.mounted) return;
+
             showPageInfo('Tersimpan');
             break;
+
           case 3:
-            showPageInfo('Profil');
+            // Profile: membutuhkan login.
+            final allowed = await GuestAccessGuard.check(context, ref);
+
+            if (!allowed || !context.mounted) return;
+
+            context.go(AppRoutes.profile);
             break;
         }
       },

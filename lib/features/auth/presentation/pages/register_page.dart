@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:go_router/go_router.dart';
-import 'package:teranusa/core/constants/app_routes.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/constants/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -10,6 +11,7 @@ import '../../../../core/widgets/app_password_field.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_section_header.dart';
 import '../../../../core/widgets/app_popup.dart';
+import '../../../../data/models/user_profile_model.dart';
 import '../../../region/presentation/providers/region_provider.dart';
 import '../../../../data/models/region_model.dart';
 
@@ -38,6 +40,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   RegionModel? selectedRegion;
   String? selectedRegionId;
   bool isAgreed = false;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -51,6 +54,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Future<void> register() async {
+    if (_isSubmitting) return;
+
     if (!_formKey.currentState!.validate()) return;
 
     if (selectedRegionId == null) {
@@ -82,38 +87,53 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       regionId: selectedRegionId!,
     );
 
-    await ref.read(authProvider.notifier).register(request);
+    setState(() => _isSubmitting = true);
 
-    if (!mounted) return;
+    try {
+      // Register sekaligus mendapatkan UserProfile.
+      final profile = await ref.read(authProvider.notifier).register(request);
 
-    final result = ref.read(authProvider);
+      if (!mounted) return;
 
-    if (result.hasError) {
       AppPopUp.show(
         context: context,
-        title: 'Registrasi Gagal',
-        message: result.error.toString(),
-        type: AppPopupType.error,
-        duration: const Duration(seconds: 5),
+        type: AppPopupType.success,
+        title: 'Registrasi berhasil',
+        message: 'Selamat datang di TeraNusa, ${profile.name}.',
       );
-      return;
+
+      context.go(AppRoutes.home);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+
+      AppPopUp.show(
+        context: context,
+        type: AppPopupType.error,
+        title: 'Registrasi gagal',
+        message: e.message,
+      );
+    } catch (e, st) {
+      if (!mounted) return;
+
+      AppPopUp.show(
+        context: context,
+        type: AppPopupType.error,
+        title: 'Registrasi gagal',
+        message: 'Tidak dapat menyelesaikan registrasi. Silakan coba kembali.',
+        duration: const Duration(seconds: 8),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
-
-    await AppPopUp.show(
-      context: context,
-      title: 'Registrasi Berhasil',
-      message: 'Selamat datang di TeraNusa! Akun kamu berhasil dibuat.',
-      type: AppPopupType.success,
-    );
-
-    if (!context.mounted) return;
-
-    context.go(AppRoutes.home);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authProvider).isLoading;
+    final isLoading = ref.watch(
+      authProvider.select((state) => state.isLoading),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -455,7 +475,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           AppButton(
                             label: 'Daftar sebagai Pencari',
                             icon: Icons.chevron_right,
-                            isLoading: isLoading,
+                            isLoading: isLoading || _isSubmitting,
                             onPressed: register,
                           ),
 

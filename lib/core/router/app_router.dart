@@ -9,8 +9,8 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
-import '../../features/profile/pages/profile_page.dart';
+import '../../features/home/home_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -30,7 +30,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ref.watch(routerRefreshProvider);
 
   final router = GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: AppRoutes.home,
 
     navigatorKey: AppRouter.rootNavigatorKey,
 
@@ -44,6 +44,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
+      // Jangan menganggap kegagalan sinkronisasi profile
+      // sebagai kondisi guest.
+      if (authState.hasError) {
+        return null;
+      }
+
       final isAuthenticated = authState.asData?.value != null;
 
       final currentLocation = state.matchedLocation;
@@ -51,15 +57,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLogin = currentLocation == AppRoutes.login;
       final isRegister = currentLocation == AppRoutes.register;
 
-      final isPublicPage = isLogin || isRegister;
+      // Halaman yang boleh diakses tanpa login.
+      final isGuestAllowed =
+          currentLocation == AppRoutes.home ||
+          currentLocation == AppRoutes.home; // perlu diubah
 
-      // Belum login tidak boleh masuk halaman privat.
+      final isPublicPage = isLogin || isRegister || isGuestAllowed;
+
+      // Guest hanya boleh mengakses halaman publik.
       if (!isAuthenticated && !isPublicPage) {
-        return AppRoutes.login;
+        return AppRoutes.home;
       }
 
-      // Sudah login tidak perlu kembali ke halaman login/register.
-      if (isAuthenticated && isPublicPage) {
+      // User yang sudah login tidak perlu kembali
+      // ke halaman login atau register.
+      if (isAuthenticated && (isLogin || isRegister)) {
         return AppRoutes.home;
       }
 
