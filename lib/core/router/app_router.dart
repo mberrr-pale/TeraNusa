@@ -67,7 +67,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           currentLocation == AppRoutes.home ||
           currentLocation == AppRoutes.opportunities ||
           currentLocation == AppRoutes.opportunityDetail ||
-          currentLocation == AppRoutes.news;
+          currentLocation == AppRoutes.news ||
+          currentLocation == AppRoutes.newsDetail;
 
       final isPublicPage = isLogin || isRegister || isGuestAllowed;
 
