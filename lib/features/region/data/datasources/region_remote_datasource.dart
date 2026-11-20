@@ -34,9 +34,9 @@ class RegionRemoteDataSource {
         .order('village', ascending: true)
         .range(start, end);
 
-    return response
-        .map<RegionModel>((json) => RegionModel.fromJson(json))
-        .toList();
+    return response.map<RegionModel>((json) {
+      return RegionModel.fromJson(json);
+    }).toList();
   }
 
   Future<RegionModel?> getRegionById(String regionId) async {

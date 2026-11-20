@@ -156,12 +156,13 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                         child: Text('Data profil tidak ditemukan.'),
                       );
                     }
-                    final regionAsync = ref.watch(
-                      getRegionByIdProvider(profile.regionId),
-                    );
 
                     // Initialize directly from current AsyncValue.
                     _initializeProfile(profile);
+
+                    final regionAsync = ref.watch(
+                      getRegionByIdProvider(_regionId ?? ''),
+                    );
 
                     return SingleChildScrollView(
                       child: Form(

@@ -614,15 +614,380 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
   }
 }
 
+class $RegionsTable extends Regions with TableInfo<$RegionsTable, Region> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RegionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _regionIdMeta = const VerificationMeta(
+    'regionId',
+  );
+  @override
+  late final GeneratedColumn<String> regionId = GeneratedColumn<String>(
+    'region_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _provinceMeta = const VerificationMeta(
+    'province',
+  );
+  @override
+  late final GeneratedColumn<String> province = GeneratedColumn<String>(
+    'province',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  @override
+  late final GeneratedColumn<String> city = GeneratedColumn<String>(
+    'city',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _districtMeta = const VerificationMeta(
+    'district',
+  );
+  @override
+  late final GeneratedColumn<String> district = GeneratedColumn<String>(
+    'district',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _villageMeta = const VerificationMeta(
+    'village',
+  );
+  @override
+  late final GeneratedColumn<String> village = GeneratedColumn<String>(
+    'village',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    regionId,
+    province,
+    city,
+    district,
+    village,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'regions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Region> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('region_id')) {
+      context.handle(
+        _regionIdMeta,
+        regionId.isAcceptableOrUnknown(data['region_id']!, _regionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_regionIdMeta);
+    }
+    if (data.containsKey('province')) {
+      context.handle(
+        _provinceMeta,
+        province.isAcceptableOrUnknown(data['province']!, _provinceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_provinceMeta);
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+        _cityMeta,
+        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cityMeta);
+    }
+    if (data.containsKey('district')) {
+      context.handle(
+        _districtMeta,
+        district.isAcceptableOrUnknown(data['district']!, _districtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_districtMeta);
+    }
+    if (data.containsKey('village')) {
+      context.handle(
+        _villageMeta,
+        village.isAcceptableOrUnknown(data['village']!, _villageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_villageMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {regionId};
+  @override
+  Region map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Region(
+      regionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}region_id'],
+      )!,
+      province: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}province'],
+      )!,
+      city: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}city'],
+      )!,
+      district: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}district'],
+      )!,
+      village: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}village'],
+      )!,
+    );
+  }
+
+  @override
+  $RegionsTable createAlias(String alias) {
+    return $RegionsTable(attachedDatabase, alias);
+  }
+}
+
+class Region extends DataClass implements Insertable<Region> {
+  final String regionId;
+  final String province;
+  final String city;
+  final String district;
+  final String village;
+  const Region({
+    required this.regionId,
+    required this.province,
+    required this.city,
+    required this.district,
+    required this.village,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['region_id'] = Variable<String>(regionId);
+    map['province'] = Variable<String>(province);
+    map['city'] = Variable<String>(city);
+    map['district'] = Variable<String>(district);
+    map['village'] = Variable<String>(village);
+    return map;
+  }
+
+  RegionsCompanion toCompanion(bool nullToAbsent) {
+    return RegionsCompanion(
+      regionId: Value(regionId),
+      province: Value(province),
+      city: Value(city),
+      district: Value(district),
+      village: Value(village),
+    );
+  }
+
+  factory Region.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Region(
+      regionId: serializer.fromJson<String>(json['regionId']),
+      province: serializer.fromJson<String>(json['province']),
+      city: serializer.fromJson<String>(json['city']),
+      district: serializer.fromJson<String>(json['district']),
+      village: serializer.fromJson<String>(json['village']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'regionId': serializer.toJson<String>(regionId),
+      'province': serializer.toJson<String>(province),
+      'city': serializer.toJson<String>(city),
+      'district': serializer.toJson<String>(district),
+      'village': serializer.toJson<String>(village),
+    };
+  }
+
+  Region copyWith({
+    String? regionId,
+    String? province,
+    String? city,
+    String? district,
+    String? village,
+  }) => Region(
+    regionId: regionId ?? this.regionId,
+    province: province ?? this.province,
+    city: city ?? this.city,
+    district: district ?? this.district,
+    village: village ?? this.village,
+  );
+  Region copyWithCompanion(RegionsCompanion data) {
+    return Region(
+      regionId: data.regionId.present ? data.regionId.value : this.regionId,
+      province: data.province.present ? data.province.value : this.province,
+      city: data.city.present ? data.city.value : this.city,
+      district: data.district.present ? data.district.value : this.district,
+      village: data.village.present ? data.village.value : this.village,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Region(')
+          ..write('regionId: $regionId, ')
+          ..write('province: $province, ')
+          ..write('city: $city, ')
+          ..write('district: $district, ')
+          ..write('village: $village')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(regionId, province, city, district, village);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Region &&
+          other.regionId == this.regionId &&
+          other.province == this.province &&
+          other.city == this.city &&
+          other.district == this.district &&
+          other.village == this.village);
+}
+
+class RegionsCompanion extends UpdateCompanion<Region> {
+  final Value<String> regionId;
+  final Value<String> province;
+  final Value<String> city;
+  final Value<String> district;
+  final Value<String> village;
+  final Value<int> rowid;
+  const RegionsCompanion({
+    this.regionId = const Value.absent(),
+    this.province = const Value.absent(),
+    this.city = const Value.absent(),
+    this.district = const Value.absent(),
+    this.village = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RegionsCompanion.insert({
+    required String regionId,
+    required String province,
+    required String city,
+    required String district,
+    required String village,
+    this.rowid = const Value.absent(),
+  }) : regionId = Value(regionId),
+       province = Value(province),
+       city = Value(city),
+       district = Value(district),
+       village = Value(village);
+  static Insertable<Region> custom({
+    Expression<String>? regionId,
+    Expression<String>? province,
+    Expression<String>? city,
+    Expression<String>? district,
+    Expression<String>? village,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (regionId != null) 'region_id': regionId,
+      if (province != null) 'province': province,
+      if (city != null) 'city': city,
+      if (district != null) 'district': district,
+      if (village != null) 'village': village,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RegionsCompanion copyWith({
+    Value<String>? regionId,
+    Value<String>? province,
+    Value<String>? city,
+    Value<String>? district,
+    Value<String>? village,
+    Value<int>? rowid,
+  }) {
+    return RegionsCompanion(
+      regionId: regionId ?? this.regionId,
+      province: province ?? this.province,
+      city: city ?? this.city,
+      district: district ?? this.district,
+      village: village ?? this.village,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (regionId.present) {
+      map['region_id'] = Variable<String>(regionId.value);
+    }
+    if (province.present) {
+      map['province'] = Variable<String>(province.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
+    }
+    if (district.present) {
+      map['district'] = Variable<String>(district.value);
+    }
+    if (village.present) {
+      map['village'] = Variable<String>(village.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RegionsCompanion(')
+          ..write('regionId: $regionId, ')
+          ..write('province: $province, ')
+          ..write('city: $city, ')
+          ..write('district: $district, ')
+          ..write('village: $village, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $UserProfilesTable userProfiles = $UserProfilesTable(this);
+  late final $RegionsTable regions = $RegionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [userProfiles];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [userProfiles, regions];
 }
 
 typedef $$UserProfilesTableCreateCompanionBuilder =
@@ -933,10 +1298,213 @@ typedef $$UserProfilesTableProcessedTableManager =
       UserProfile,
       PrefetchHooks Function()
     >;
+typedef $$RegionsTableCreateCompanionBuilder = RegionsCompanion Function({
+  required String regionId,
+  required String province,
+  required String city,
+  required String district,
+  required String village,
+  Value<int> rowid,
+});
+typedef $$RegionsTableUpdateCompanionBuilder = RegionsCompanion Function({
+  Value<String> regionId,
+  Value<String> province,
+  Value<String> city,
+  Value<String> district,
+  Value<String> village,
+  Value<int> rowid,
+});
+
+class $$RegionsTableFilterComposer
+    extends Composer<_$AppDatabase, $RegionsTable> {
+  $$RegionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get regionId => $composableBuilder(
+    column: $table.regionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get province => $composableBuilder(
+    column: $table.province,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get district => $composableBuilder(
+    column: $table.district,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get village => $composableBuilder(
+    column: $table.village,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RegionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RegionsTable> {
+  $$RegionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get regionId => $composableBuilder(
+    column: $table.regionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get province => $composableBuilder(
+    column: $table.province,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get district => $composableBuilder(
+    column: $table.district,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get village => $composableBuilder(
+    column: $table.village,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RegionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RegionsTable> {
+  $$RegionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get regionId =>
+      $composableBuilder(column: $table.regionId, builder: (column) => column);
+
+  GeneratedColumn<String> get province =>
+      $composableBuilder(column: $table.province, builder: (column) => column);
+
+  GeneratedColumn<String> get city =>
+      $composableBuilder(column: $table.city, builder: (column) => column);
+
+  GeneratedColumn<String> get district =>
+      $composableBuilder(column: $table.district, builder: (column) => column);
+
+  GeneratedColumn<String> get village =>
+      $composableBuilder(column: $table.village, builder: (column) => column);
+}
+
+class $$RegionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RegionsTable,
+          Region,
+          $$RegionsTableFilterComposer,
+          $$RegionsTableOrderingComposer,
+          $$RegionsTableAnnotationComposer,
+          $$RegionsTableCreateCompanionBuilder,
+          $$RegionsTableUpdateCompanionBuilder,
+          (Region, BaseReferences<_$AppDatabase, $RegionsTable, Region>),
+          Region,
+          PrefetchHooks Function()
+        > {
+  $$RegionsTableTableManager(_$AppDatabase db, $RegionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RegionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RegionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RegionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> regionId = const Value.absent(),
+                Value<String> province = const Value.absent(),
+                Value<String> city = const Value.absent(),
+                Value<String> district = const Value.absent(),
+                Value<String> village = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RegionsCompanion(
+                regionId: regionId,
+                province: province,
+                city: city,
+                district: district,
+                village: village,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String regionId,
+                required String province,
+                required String city,
+                required String district,
+                required String village,
+                Value<int> rowid = const Value.absent(),
+              }) => RegionsCompanion.insert(
+                regionId: regionId,
+                province: province,
+                city: city,
+                district: district,
+                village: village,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$RegionsTable, Region>(table),
+                  BaseReferences<_$AppDatabase, $RegionsTable, Region>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RegionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RegionsTable,
+      Region,
+      $$RegionsTableFilterComposer,
+      $$RegionsTableOrderingComposer,
+      $$RegionsTableAnnotationComposer,
+      $$RegionsTableCreateCompanionBuilder,
+      $$RegionsTableUpdateCompanionBuilder,
+      (Region, BaseReferences<_$AppDatabase, $RegionsTable, Region>),
+      Region,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$UserProfilesTableTableManager get userProfiles =>
       $$UserProfilesTableTableManager(_db, _db.userProfiles);
+  $$RegionsTableTableManager get regions =>
+      $$RegionsTableTableManager(_db, _db.regions);
 }
