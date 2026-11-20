@@ -6,4 +6,6 @@ abstract class RegionRepository {
     int page = 0,
     int limit = 20,
   });
+
+  Future<RegionModel?> getRegionById(String regionId);
 }

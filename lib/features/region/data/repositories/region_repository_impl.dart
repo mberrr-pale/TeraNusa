@@ -19,4 +19,9 @@ class RegionRepositoryImpl implements RegionRepository {
       limit: limit,
     );
   }
+
+  @override
+  Future<RegionModel?> getRegionById(String regionId) {
+    return remoteDataSource.getRegionById(regionId);
+  }
 }

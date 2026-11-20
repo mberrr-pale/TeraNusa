@@ -38,4 +38,16 @@ class RegionRemoteDataSource {
         .map<RegionModel>((json) => RegionModel.fromJson(json))
         .toList();
   }
+
+  Future<RegionModel?> getRegionById(String regionId) async {
+    final response = await supabase
+        .from('regions')
+        .select('region_id, province, city, district, village')
+        .eq('region_id', regionId)
+        .maybeSingle();
+
+    if (response == null) return null;
+
+    return RegionModel.fromJson(response);
+  }
 }

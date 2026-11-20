@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+
+import '../../../../data/models/region_model.dart';
+import '../../../region/presentation/providers/region_provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_dialog.dart';
@@ -20,7 +24,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _regionController = TextEditingController();
+  String? _regionId;
 
   bool _isLoading = false;
   bool _initialized = false;
@@ -30,7 +34,6 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
     _nameController.dispose();
     _usernameController.dispose();
     _phoneController.dispose();
-    _regionController.dispose();
     super.dispose();
   }
 
@@ -42,7 +45,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
     _nameController.text = profile.name;
     _usernameController.text = profile.username;
     _phoneController.text = profile.phone;
-    _regionController.text = profile.regionId;
+    _regionId = profile.regionId;
 
     _initialized = true;
   }
@@ -62,7 +65,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
           name: _nameController.text.trim(),
           username: _usernameController.text.trim(),
           phone: _phoneController.text.trim(),
-          regionId: _regionController.text.trim(),
+          regionId: _regionId ?? '',
         ),
       );
 
@@ -153,6 +156,9 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                         child: Text('Data profil tidak ditemukan.'),
                       );
                     }
+                    final regionAsync = ref.watch(
+                      getRegionByIdProvider(profile.regionId),
+                    );
 
                     // Initialize directly from current AsyncValue.
                     _initializeProfile(profile);
@@ -185,11 +191,21 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                               keyboardType: TextInputType.phone,
                             ),
 
-                            _buildTextField(
-                              label: 'Wilayah',
-                              hint: 'Masukkan ID wilayah',
-                              controller: _regionController,
-                              icon: Icons.location_on_outlined,
+                            regionAsync.when(
+                              loading: () => const Padding(
+                                padding: EdgeInsets.only(bottom: 15),
+                                child: LinearProgressIndicator(),
+                              ),
+
+                              error: (error, stack) => const Padding(
+                                padding: EdgeInsets.only(bottom: 15),
+                                child: Text(
+                                  'Gagal memuat data wilayah.',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+
+                              data: (region) => _buildRegionDropdown(region),
                             ),
 
                             const SizedBox(height: 8),
@@ -343,6 +359,74 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
               return null;
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= DROPDOWN REGION =================
+  Widget _buildRegionDropdown(RegionModel? region) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Wilayah',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.heading,
+            ),
+          ),
+
+          const SizedBox(height: 7),
+
+          DropdownSearch<RegionModel>(
+            selectedItem: region,
+
+            enabled: false,
+
+            items: (filter, loadProps) async {
+              return region == null ? [] : [region];
+            },
+
+            itemAsString: (region) {
+              return '${region.village}, '
+                  '${region.district}, '
+                  '${region.city}, '
+                  '${region.province}';
+            },
+
+            compareFn: (a, b) {
+              return a.regionId == b.regionId;
+            },
+
+            decoratorProps: DropDownDecoratorProps(
+              decoration: InputDecoration(
+                hintText: 'Wilayah tidak tersedia',
+                prefixIcon: const Icon(
+                  Icons.location_on_outlined,
+                  color: AppColors.primary,
+                  size: 19,
+                ),
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+              ),
+            ),
           ),
         ],
       ),
