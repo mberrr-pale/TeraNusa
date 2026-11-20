@@ -39,6 +39,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isUploadingAvatar = false;
 
   final ImagePicker _picker = ImagePicker();
+  final GlobalKey<AvatarPreviewDialogState> _avatarPreviewKey =
+      GlobalKey<AvatarPreviewDialogState>();
 
   // ================= BUILD =================
 
@@ -84,6 +86,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 onAvatarTap: () {
                   _showAvatarPreview(user);
                 },
+                onDeleteAvatar: _deleteAvatar,
               ),
 
               const SizedBox(height: 20),
@@ -162,9 +165,64 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       user: user,
       onEdit: _showAvatarOptions,
+      onDelete: _deleteAvatar,
+      key: _avatarPreviewKey,
     );
   }
 
+  // ================= DELETE AVATAR =================
+
+  Future<void> _deleteAvatar() async {
+    final isOnline = ref.read(internetStatusProvider).asData?.value ?? false;
+
+    if (!isOnline) {
+      _showOfflineInfo();
+      return;
+    }
+
+    if (_isUploadingAvatar) return;
+
+    try {
+      setState(() {
+        _isUploadingAvatar = true;
+      });
+
+      await ref.read(deleteAvatarProvider)();
+
+      if (!mounted) return;
+
+      // Langsung ubah preview menjadi avatar default.
+      _avatarPreviewKey.currentState?.removeAvatar();
+
+      // Refresh provider.
+      ref.invalidate(authProvider);
+      ref.invalidate(profileProvider);
+
+      await AppDialog.show(
+        context,
+        title: 'Berhasil',
+        message: 'Foto profil berhasil dihapus.',
+        type: AppDialogType.success,
+        confirmLabel: 'Mengerti',
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      await AppDialog.show(
+        context,
+        title: 'Gagal Menghapus Foto',
+        message: 'Terjadi kesalahan: $e',
+        type: AppDialogType.error,
+        confirmLabel: 'Mengerti',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingAvatar = false;
+        });
+      }
+    }
+  }
   // ================= AVATAR OPTIONS =================
 
   void _showAvatarOptions() {
@@ -203,27 +261,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
       if (!mounted) return;
 
+      // Ambil profil terbaru dari repository.
+      final updatedProfile = await ref
+          .read(profileRepositoryProvider)
+          .getProfile();
+
+      if (!mounted) return;
+
+      // Refresh gambar pada dialog yang sedang terbuka.
+      if (updatedProfile != null) {
+        _avatarPreviewKey.currentState?.updateAvatar(
+          avatarUrl: updatedProfile.avatarUrl,
+          localPath: updatedProfile.avatarLocalPath,
+        );
+      }
+
+      // Refresh provider.
       ref.invalidate(authProvider);
       ref.invalidate(profileProvider);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Foto profil berhasil diperbarui')),
+      await AppDialog.show(
+        context,
+        title: 'Berhasil',
+        message: 'Foto profil berhasil diperbarui.',
+        type: AppDialogType.success,
+        confirmLabel: 'Mengerti',
       );
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memperbarui foto profil: $e'),
-          duration: const Duration(days: 1),
-          behavior: SnackBarBehavior.floating,
-          action: SnackBarAction(
-            label: 'Tutup',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
+      await AppDialog.show(
+        context,
+        title: 'Gagal Memperbarui Foto',
+        message: 'Terjadi kesalahan: $e',
+        type: AppDialogType.error,
+        confirmLabel: 'Mengerti',
       );
     } finally {
       if (mounted) {

@@ -9,6 +9,7 @@ class ProfileHeader extends StatelessWidget {
   final bool isOnline;
   final bool isUploadingAvatar;
   final VoidCallback onAvatarTap;
+  final VoidCallback onDeleteAvatar;
 
   const ProfileHeader({
     super.key,
@@ -16,6 +17,7 @@ class ProfileHeader extends StatelessWidget {
     required this.isOnline,
     required this.isUploadingAvatar,
     required this.onAvatarTap,
+    required this.onDeleteAvatar,
   });
 
   @override
@@ -89,6 +91,7 @@ class ProfileHeader extends StatelessWidget {
                   isOnline: isOnline,
                   isUploading: isUploadingAvatar,
                   onEdit: onAvatarTap,
+                  onDelete: onDeleteAvatar,
                 ),
               ),
             ),

@@ -12,4 +12,6 @@ abstract class ProfileRepository {
   Future<void> changePassword(ChangePasswordRequest request);
 
   Future<void> updateAvatar(File imageFile);
+
+  Future<void> deleteAvatar();
 }

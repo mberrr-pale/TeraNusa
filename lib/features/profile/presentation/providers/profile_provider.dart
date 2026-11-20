@@ -66,3 +66,10 @@ final updateAvatarProvider = Provider((ref) {
     return ref.read(profileRepositoryProvider).updateAvatar(imageFile);
   };
 });
+
+// Delete Avatar Provider
+final deleteAvatarProvider = Provider((ref) {
+  return () {
+    return ref.read(profileRepositoryProvider).deleteAvatar();
+  };
+});

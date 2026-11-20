@@ -152,4 +152,37 @@ class ProfileLocalDataSource {
 
     return savedFile.path;
   }
+
+  // Hapus foto profil lokal dan kosongkan cache avatar di Drift
+  Future<void> deleteAvatarLocally({required String userId}) async {
+    await database.transaction(() async {
+      // 1. Ambil data profil lokal.
+      final profile = await (database.select(
+        database.userProfiles,
+      )..where((t) => t.userId.equals(userId))).getSingleOrNull();
+
+      if (profile == null) return;
+
+      // 2. Hapus file avatar dari perangkat.
+      final localPath = profile.avatarLocalPath;
+
+      if (localPath != null && localPath.isNotEmpty) {
+        final file = File(localPath);
+
+        if (await file.exists()) {
+          await file.delete();
+        }
+      }
+
+      // 3. Kosongkan URL dan path avatar di Drift.
+      await (database.update(
+        database.userProfiles,
+      )..where((t) => t.userId.equals(userId))).write(
+        const db.UserProfilesCompanion(
+          avatarUrl: Value(null),
+          avatarLocalPath: Value(null),
+        ),
+      );
+    });
+  }
 }

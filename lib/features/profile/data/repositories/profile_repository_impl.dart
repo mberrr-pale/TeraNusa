@@ -103,7 +103,23 @@ class ProfileRepositoryImpl implements ProfileRepository {
       avatarUrl: avatarUrl,
       avatarLocalPath: localPath,
     );
+  }
 
-    // Selesai.
+  // ================= DELETE AVATAR =================
+
+  @override
+  Future<void> deleteAvatar() async {
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('Pengguna belum login.');
+    }
+
+    // 1. Hapus avatar dari Supabase Storage
+    //    dan kosongkan avatar_url di Supabase.
+    await remoteDataSource.deleteAvatar();
+
+    // 2. Hapus file lokal dan cache avatar di Drift.
+    await localDataSource.deleteAvatarLocally(userId: user.id);
   }
 }

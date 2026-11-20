@@ -91,4 +91,32 @@ class ProfileRemoteDataSource {
 
     await supabase.auth.updateUser(UserAttributes(password: newPassword));
   }
+
+  Future<void> deleteAvatar() async {
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('Pengguna belum login.');
+    }
+
+    // 1. Cari semua file avatar milik user.
+    final files = await supabase.storage.from('avatars').list(path: user.id);
+
+    // 2. Ambil file yang memiliki prefix profile.
+    final avatarFiles = files
+        .where((file) => file.name.startsWith('profile'))
+        .map((file) => '${user.id}/${file.name}')
+        .toList();
+
+    // 3. Hapus file dari Supabase Storage.
+    if (avatarFiles.isNotEmpty) {
+      await supabase.storage.from('avatars').remove(avatarFiles);
+    }
+
+    // 4. Kosongkan URL avatar di database.
+    await supabase
+        .from('profiles')
+        .update({'avatar_url': null})
+        .eq('user_id', user.id);
+  }
 }

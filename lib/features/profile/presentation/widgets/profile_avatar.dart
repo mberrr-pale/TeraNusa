@@ -11,6 +11,7 @@ class ProfileAvatar extends StatelessWidget {
   final bool isOnline;
   final bool isUploading;
   final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const ProfileAvatar({
     super.key,
@@ -18,6 +19,7 @@ class ProfileAvatar extends StatelessWidget {
     required this.isOnline,
     required this.isUploading,
     required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -34,6 +36,7 @@ class ProfileAvatar extends StatelessWidget {
                     context: context,
                     user: user,
                     onEdit: onEdit,
+                    onDelete: onDelete,
                   );
                 },
           child: Container(
@@ -44,10 +47,11 @@ class ProfileAvatar extends StatelessWidget {
               color: AppColors.bannerStart,
               border: Border.all(color: AppColors.white, width: 4),
             ),
-            child: ClipOval(child: _buildImage(context)),
+            child: ClipOval(child: _buildImage()),
           ),
         ),
 
+        // Tombol kamera
         Positioned(
           right: 0,
           bottom: 0,
@@ -82,25 +86,20 @@ class ProfileAvatar extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(BuildContext context) {
+  Widget _buildImage() {
     final url = user.avatarUrl;
     final path = user.avatarLocalPath;
 
-    return GestureDetector(
-      onTap: () {
-        AvatarPreviewDialog.show(context: context, user: user, onEdit: onEdit);
-      },
-      child: ClipOval(
-        child: url != null && url.isNotEmpty
-            ? Image.network(
-                url,
-                key: ValueKey(url),
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => _localImage(path),
-              )
-            : _localImage(path),
-      ),
-    );
+    if (url != null && url.isNotEmpty) {
+      return Image.network(
+        url,
+        key: ValueKey(url),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _localImage(path),
+      );
+    }
+
+    return _localImage(path);
   }
 
   Widget _localImage(String? path) {
