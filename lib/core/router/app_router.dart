@@ -15,6 +15,8 @@ import '../../features/news/news_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/opportunity_detail/opportunity_detail_page.dart';
 import '../../data/models/opportunity.dart';
+import '../../data/models/news.dart';
+import '../../features/news/news_detail_page.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -131,6 +133,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'news',
         builder: (context, state) {
           return const NewsPage();
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.newsDetail,
+        name: 'newsDetail',
+        builder: (context, state) {
+          final news = state.extra as News;
+
+          return NewsDetailPage(news: news);
         },
       ),
 

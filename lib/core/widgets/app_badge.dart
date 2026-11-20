@@ -9,6 +9,9 @@ class AppBadge extends StatelessWidget {
   final AppBadgeType type;
   final IconData? icon;
   final bool outlined;
+  final bool fullWidth;
+  final double? height;
+  final bool bordered;
 
   const AppBadge({
     super.key,
@@ -16,6 +19,9 @@ class AppBadge extends StatelessWidget {
     this.type = AppBadgeType.primary,
     this.icon,
     this.outlined = false,
+    this.fullWidth = false,
+    this.height,
+    this.bordered = false,
   });
 
   Color get badgeColor {
@@ -23,7 +29,7 @@ class AppBadge extends StatelessWidget {
       case AppBadgeType.primary:
         return AppColors.primary;
       case AppBadgeType.success:
-        return const Color(0xFF198754);
+        return AppColors.primary;
       case AppBadgeType.warning:
         return const Color(0xFFE69A21);
       case AppBadgeType.error:
@@ -40,25 +46,36 @@ class AppBadge extends StatelessWidget {
     final color = badgeColor;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+      width: fullWidth ? double.infinity : null,
+      height: height,
+      padding: EdgeInsets.symmetric(
+        horizontal: fullWidth ? 15 : 11,
+        vertical: fullWidth ? 10 : 6,
+      ),
       decoration: BoxDecoration(
-        color: outlined ? Colors.transparent : color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(20),
-        border: outlined ? Border.all(color: color) : null,
+        color: outlined ? Colors.transparent : color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(15),
+        border: (outlined || bordered)
+            ? Border.all(color: color.withValues(alpha: 0.25))
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 13, color: color),
-            const SizedBox(width: 5),
+            Icon(icon, size: 24, color: color),
+            const SizedBox(width: 10),
           ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
+          Expanded(
+            flex: fullWidth ? 1 : 0,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
             ),
           ),
         ],

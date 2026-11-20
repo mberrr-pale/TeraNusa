@@ -14,7 +14,7 @@ class AppRoutes {
 
   // Page
   static const String opportunityDetail = '/opportunity-detail';
-  
+  static const String newsDetail = '/news-detail';
 
   // Profile
   static const String profile = '/profile';

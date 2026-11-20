@@ -33,71 +33,83 @@ class AppBottomSheet {
                 ),
                 Align(
                   alignment: Alignment.bottomCenter,
-                  child: SafeArea(
-                    top: false,
-                    child: Material(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(28),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * 0.85,
+                  child: AnimatedPadding(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: Material(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(28),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 54,
-                                height: 5,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFD8E3DC),
-                                  borderRadius: BorderRadius.circular(10),
+                        clipBehavior: Clip.antiAlias,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight:
+                                MediaQuery.of(context).size.height * 0.85,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 54,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFD8E3DC),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      title,
-                                      style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF194D29),
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        title,
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF194D29),
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton.filled(
+                                      onPressed: () => Navigator.pop(context),
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: const Color(
+                                          0xFFE8F4E9,
+                                        ),
+                                        foregroundColor: const Color(
+                                          0xFF194D29,
+                                        ),
+                                      ),
+                                      icon: const Icon(Icons.close),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Flexible(
+                                  child: SingleChildScrollView(
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: contentBuilder(
+                                        context,
+                                        setSheetState,
                                       ),
                                     ),
                                   ),
-                                  IconButton.filled(
-                                    onPressed: () => Navigator.pop(context),
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: const Color(0xFFE8F4E9),
-                                      foregroundColor: const Color(0xFF194D29),
-                                    ),
-                                    icon: const Icon(Icons.close),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Flexible(
-                                child: SingleChildScrollView(
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: contentBuilder(
-                                      context,
-                                      setSheetState,
-                                    ),
-                                  ),
                                 ),
-                              ),
-                              if (action != null) ...[
-                                const SizedBox(height: 20),
-                                action,
+                                if (action != null) ...[
+                                  const SizedBox(height: 20),
+                                  action,
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ),

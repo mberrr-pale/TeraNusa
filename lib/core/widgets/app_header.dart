@@ -8,18 +8,21 @@ class AppHeader extends StatelessWidget {
   final String? title;
   final bool showBackButton;
   final bool overlay;
+  final Widget? trailing;
 
   // Header utama.
   const AppHeader({super.key})
     : title = null,
       showBackButton = false,
-      overlay = false;
+      overlay = false,
+      trailing = null;
 
   // Header halaman.
   const AppHeader.backTitle({
     super.key,
     required this.title,
     this.overlay = false,
+    this.trailing,
   }) : showBackButton = true;
 
   @override
@@ -70,14 +73,25 @@ class AppHeader extends StatelessWidget {
             ),
           ),
         ),
-        Text(
-          title!,
-          style: AppTextStyles.cardTitle.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: overlay ? AppColors.white : AppColors.heading,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 48),
+          child: Text(
+            title!,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.cardTitle.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: overlay ? AppColors.white : AppColors.heading,
+            ),
           ),
         ),
+        if (trailing != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: trailing!,
+          ),
       ],
     );
   }

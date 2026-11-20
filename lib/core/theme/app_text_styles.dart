@@ -40,7 +40,7 @@ class AppTextStyles {
   );
 
   static const TextStyle button = TextStyle(
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: FontWeight.w700,
     color: Colors.white,
   );

@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/app_action_button.dart';
+import '../../core/widgets/app_badge.dart';
+import '../../core/widgets/app_bottom_sheet.dart';
+import '../../core/widgets/app_button.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/app_dialog.dart';
 import '../../core/widgets/app_header.dart';
+import '../../core/widgets/app_snackbar.dart';
+import '../../core/widgets/expandable_description.dart';
 import '../../data/models/opportunity.dart';
 
 class OpportunityDetailPage extends StatelessWidget {
@@ -40,23 +50,200 @@ class OpportunityDetailPage extends StatelessWidget {
     }
   }
 
+  static const List<String> _months = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
+  ];
+
   String _formatDate(DateTime date) {
-    const months = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
+    return '${date.day} ${_months[date.month - 1]} ${date.year}';
+  }
+
+  Future<void> _shareOpportunity() async {
+    final source = opportunity.source?.trim();
+    final contact = opportunity.contact?.trim();
+
+    final shareText = [
+      opportunity.title,
+      '',
+      'Kategori: ${_getCategoryName(opportunity.category)}',
+      'Wilayah: ${opportunity.regionName ?? 'Tidak diketahui'}',
+      'Berlaku hingga: ${_formatDate(opportunity.endDate)}',
+      '',
+      opportunity.description,
+      '',
+      'Sumber: ${source?.isNotEmpty == true ? source : 'Tidak tersedia'}',
+      if (contact?.isNotEmpty == true) 'Kontak: $contact',
+      '',
+      'Temukan peluang menarik lainnya melalui aplikasi TeraNusa.',
+    ].join('\n');
+
+    await SharePlus.instance.share(ShareParams(text: shareText));
+  }
+
+  Future<void> _showReportBottomSheet(BuildContext context) async {
+    String? selectedReason;
+    String otherReasonText = '';
+
+    const reasons = [
+      'Informasi tidak benar atau menyesatkan',
+      'Peluang sudah kedaluwarsa',
+      'Penipuan atau mencurigakan',
+      'Konten tidak pantas',
+      'Lainnya',
     ];
 
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+    final shouldShowFeedback = await AppBottomSheet.show<bool>(
+      context: context,
+      title: 'Laporkan Peluang',
+      contentBuilder: (sheetContext, setSheetState) {
+        final isOtherSelected = selectedReason == 'Lainnya';
+
+        final canSubmit =
+            selectedReason != null &&
+            (!isOtherSelected || otherReasonText.trim().isNotEmpty);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Bantu kami menjaga TeraNusa tetap aman dan terpercaya. '
+              'Pilih alasan pelaporan yang sesuai.',
+              style: AppTextStyles.body.copyWith(height: 1.5),
+            ),
+
+            const SizedBox(height: 14),
+
+            RadioGroup<String>(
+              groupValue: selectedReason,
+              onChanged: (value) {
+                setSheetState(() {
+                  selectedReason = value;
+                });
+              },
+              child: Column(
+                children: reasons.map((reason) {
+                  final isSelected = selectedReason == reason;
+
+                  return InkWell(
+                    onTap: () {
+                      setSheetState(() {
+                        selectedReason = reason;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.08)
+                            : AppColors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.border,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Radio<String>(
+                            value: reason,
+                            activeColor: AppColors.primary,
+                          ),
+                          Expanded(
+                            child: Text(
+                              reason,
+                              style: AppTextStyles.body.copyWith(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+
+            if (isOtherSelected) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Jelaskan alasan laporan',
+                style: AppTextStyles.label.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                minLines: 3,
+                maxLines: 3,
+                onChanged: (value) {
+                  setSheetState(() {
+                    otherReasonText = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Tuliskan alasan laporan...',
+                  hintStyle: AppTextStyles.secondary,
+                  filled: true,
+                  fillColor: AppColors.white,
+                  contentPadding: const EdgeInsets.all(12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 12),
+
+            AppButton(
+              label: 'Kirim Laporan',
+              onPressed: canSubmit
+                  ? () {
+                      FocusScope.of(sheetContext).unfocus();
+                      Navigator.of(sheetContext).pop(true);
+                    }
+                  : null,
+              height: 50,
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldShowFeedback == true && context.mounted) {
+      AppSnackBar.showError(
+        context,
+        title: 'Fitur belum tersedia',
+        message: 'Pelaporan peluang belum dapat digunakan saat ini.',
+      );
+    }
   }
 
   Widget _buildHeroImage(Color categoryColor, Color categoryBackground) {
@@ -92,15 +279,12 @@ class OpportunityDetailPage extends StatelessWidget {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTextStyles.sectionTitle.copyWith(fontSize: 16),
-    );
+    return Text(title, style: AppTextStyles.pageTitle.copyWith(fontSize: 16));
   }
 
   Widget _buildCategoryBadge(Color categoryColor, Color categoryBackground) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: categoryBackground,
         borderRadius: BorderRadius.circular(30),
@@ -111,7 +295,7 @@ class OpportunityDetailPage extends StatelessWidget {
           Icon(
             _getCategoryIcon(opportunity.category),
             color: categoryColor,
-            size: 17,
+            size: 14,
           ),
           const SizedBox(width: 7),
           Text(
@@ -127,61 +311,62 @@ class OpportunityDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationInfo() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(
-          Icons.location_on_outlined,
-          size: 19,
-          color: AppColors.secondaryText,
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return SizedBox(
+      height: 76,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        backgroundColor: AppColors.white,
+        borderRadius: 13,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(icon, size: 26, color: AppColors.primary),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.secondary.copyWith(fontSize: 10.5),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.body.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 7),
-        Expanded(
-          child: Text(
-            opportunity.regionName ?? 'Wilayah tidak diketahui',
-            style: AppTextStyles.secondary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildExpiryInfo() {
-    return Row(
-      children: [
-        const Icon(
-          Icons.calendar_today_outlined,
-          size: 17,
-          color: AppColors.secondaryText,
-        ),
-        const SizedBox(width: 9),
-        Expanded(
-          child: Text(
-            'Berlaku hingga ${_formatDate(opportunity.endDate)}',
-            style: AppTextStyles.secondary,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildSourceInfo() {
     final source = opportunity.source?.trim();
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Text(
-        source != null && source.isNotEmpty
-            ? source
-            : 'Informasi sumber belum tersedia.',
-        style: AppTextStyles.secondary.copyWith(fontSize: 12),
-      ),
+    return AppBadge(
+      label: source?.isNotEmpty == true 
+        ? source
+        ! : 'Sumber belum tersedia',
+      type: AppBadgeType.success,
+      icon: Icons.verified_rounded,
+      fullWidth: true,
+      height: 52,
+      bordered: true,
     );
   }
 
@@ -190,15 +375,15 @@ class OpportunityDetailPage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: AppColors.error.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.30)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(Icons.shield_outlined, color: AppColors.primary, size: 22),
-          const SizedBox(width: 11),
+          const Icon(Icons.shield_rounded, color: AppColors.error, size: 26),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Tetap waspada dan verifikasi informasi '
@@ -206,12 +391,112 @@ class OpportunityDetailPage extends StatelessWidget {
               'melakukan transaksi. Jangan pernah '
               'membagikan OTP, kata sandi, maupun '
               'informasi keuangan.',
-              style: AppTextStyles.body.copyWith(fontSize: 12, height: 1.5),
+              style: AppTextStyles.label.copyWith(fontSize: 13, height: 1.5),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: AppActionButton(
+            label: 'Simpan',
+            icon: Icons.bookmark_outline_rounded,
+            onPressed: () {},
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: AppActionButton(
+            label: 'Bagikan',
+            icon: Icons.share_outlined,
+            onPressed: _shareOpportunity,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: AppActionButton(
+            label: 'Laporkan',
+            icon: Icons.report_gmailerrorred_outlined,
+            iconColor: AppColors.error,
+            textColor: AppColors.error,
+            onPressed: () => _showReportBottomSheet(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _contactSource(BuildContext context) async {
+    final contact = opportunity.contact?.trim();
+
+    if (contact == null || contact.isEmpty) {
+      AppSnackBar.showError(
+        context,
+        title: 'Kontak tidak tersedia',
+        message: 'Sumber belum mencantumkan informasi kontak.',
+      );
+      return;
+    }
+
+    final uri = Uri.tryParse(contact);
+
+    if (uri == null ||
+        !['https', 'http', 'tel', 'mailto'].contains(uri.scheme)) {
+      AppSnackBar.showError(
+        context,
+        title: 'Kontak tidak valid',
+        message: 'Informasi kontak sumber tidak dapat dibuka.',
+      );
+      return;
+    }
+
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched && context.mounted) {
+        AppSnackBar.showError(
+          context,
+          title: 'Gagal membuka kontak',
+          message: 'Silakan coba lagi nanti.',
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        AppSnackBar.showError(
+          context,
+          title: 'Gagal membuka kontak',
+          message: 'Silakan coba lagi nanti.',
+        );
+      }
+    }
+  }
+
+  Future<void> _showContactConfirmation(BuildContext context) async {
+    final shouldContinue = await AppDialog.show(
+      context,
+      title: 'Peringatan Keamanan',
+      message:
+          '\nKamu akan diarahkan ke aplikasi atau situs eksternal '
+          'untuk menghubungi sumber peluang.\n\n'
+          'Pastikan kamu tetap berhati-hati.\n'
+          'Jangan membagikan informasi pribadi yang sensitif, '
+          'dan waspadai permintaan biaya yang tidak jelas.',
+      type: AppDialogType.warning,
+      confirmLabel: 'Ya, Lanjutkan',
+      cancelLabel: 'Batal',
+    );
+
+    if (shouldContinue == true && context.mounted) {
+      await _contactSource(context);
+    }
   }
 
   @override
@@ -223,7 +508,7 @@ class OpportunityDetailPage extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -241,7 +526,7 @@ class OpportunityDetailPage extends StatelessWidget {
                       child: _buildHeroImage(categoryColor, categoryBackground),
                     ),
 
-                    // Header berada di atas dan sedikit menutupi gambar.
+                    // Header berada di atas gambar.
                     const Positioned(
                       top: 0,
                       left: 0,
@@ -262,7 +547,7 @@ class OpportunityDetailPage extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 30),
                   decoration: const BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.background,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(24),
                     ),
@@ -270,47 +555,72 @@ class OpportunityDetailPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Kategori.
-                      _buildCategoryBadge(categoryColor, categoryBackground),
-
-                      const SizedBox(height: 14),
-
-                      // Judul peluang.
-                      Text(
-                        opportunity.title,
-                        style: AppTextStyles.pageTitle.copyWith(fontSize: 23),
+                      // Judul di kiri dan badge kategori di kanan.
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              opportunity.title,
+                              style: AppTextStyles.pageTitle.copyWith(
+                                fontSize: 24,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          _buildCategoryBadge(
+                            categoryColor,
+                            categoryBackground,
+                          ),
+                        ],
                       ),
 
                       const SizedBox(height: 24),
 
                       // Informasi wilayah dan masa berlaku.
-                      _buildLocationInfo(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _buildInfoCard(
+                              icon: Icons.location_on_sharp,
+                              label: 'Wilayah',
+                              value:
+                                  opportunity.regionName ?? 'Tidak diketahui',
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildInfoCard(
+                              icon: Icons.calendar_month_rounded,
+                              label: 'Berlaku hingga',
+                              value: _formatDate(opportunity.endDate),
+                            ),
+                          ),
+                        ],
+                      ),
 
-                      const SizedBox(height: 9),
-
-                      _buildExpiryInfo(),
-
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 18),
 
                       const Divider(color: AppColors.border),
 
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 12),
 
                       // Deskripsi peluang.
                       _buildSectionTitle('Tentang Peluang'),
 
                       const SizedBox(height: 10),
 
-                      Text(
-                        opportunity.description,
-                        style: AppTextStyles.body.copyWith(height: 1.6),
+                      ExpandableDescription(
+                        description: opportunity.description,
+                        textStyle: AppTextStyles.body.copyWith(height: 1.6),
                       ),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 16),
 
                       const Divider(color: AppColors.border),
 
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 12),
 
                       // Informasi sumber.
                       _buildSectionTitle('Informasi Sumber'),
@@ -319,15 +629,37 @@ class OpportunityDetailPage extends StatelessWidget {
 
                       _buildSourceInfo(),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 18),
 
                       // Peringatan keamanan.
                       _buildSecurityWarning(),
+
+                      const SizedBox(height: 18),
+
+                      // Button Action.
+                      _buildActionButtons(context),
                     ],
                   ),
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          child: AppButton(
+            label: 'Hubungi sumber',
+            icon: Icons.chat_rounded,
+            trailingIcon: Icons.arrow_forward_ios_rounded,
+            onPressed: () => _showContactConfirmation(context),
+            height: 50,
           ),
         ),
       ),

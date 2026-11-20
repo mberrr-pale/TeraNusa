@@ -7,6 +7,7 @@ class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final IconData? trailingIcon;
   final bool isLoading;
   final bool isExpanded;
   final Color? backgroundColor;
@@ -22,6 +23,7 @@ class AppButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.trailingIcon,
     this.isLoading = false,
     this.isExpanded = true,
     this.backgroundColor,
@@ -67,6 +69,47 @@ class AppButton extends StatelessWidget {
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 color: AppColors.white,
+              ),
+            )
+          : trailingIcon != null
+          ? SizedBox(
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Label dan icon 1 tetap berada di tengah.
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        label,
+                        style: AppTextStyles.button.copyWith(
+                          color:
+                              textColor ?? foregroundColor ?? AppColors.white,
+                        ),
+                      ),
+                      if (icon != null) ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          icon,
+                          size: 22,
+                          color: foregroundColor ?? AppColors.white,
+                        ),
+                      ],
+                    ],
+                  ),
+
+                  // Panah berada di ujung kanan tombol.
+                  Positioned(
+                    right: 0,
+                    child: Icon(
+                      trailingIcon,
+                      size: 22,
+                      color: foregroundColor ?? AppColors.white,
+                    ),
+                  ),
+                ],
               ),
             )
           : Row(

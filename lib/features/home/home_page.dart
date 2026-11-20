@@ -57,7 +57,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   // REUSABLE DIALOG
 
-  void showPageInfo(String title, String message) {
+  void _showPageInfo(String title, String message) {
     AppDialog.show(context, title: title, message: message);
   }
 
@@ -134,10 +134,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         builder: (context, constraints) {
           final iconSize = constraints.maxWidth < 320 ? 68.0 : 85.0;
 
-          final textWidth = (constraints.maxWidth - iconSize - 15).clamp(
-            0.0,
-            270.0,
-          );
+          final textWidth = (constraints.maxWidth - iconSize - 15)
+              .clamp(0.0, 270.0)
+              .toDouble();
 
           return Stack(
             children: [
@@ -410,7 +409,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     );
                   },
                   onBookmarkTap: () {
-                    showPageInfo(
+                    _showPageInfo(
                       'Simpan Peluang',
                       'Fitur menyimpan peluang sedang '
                           'dalam tahap pengembangan.',
@@ -539,11 +538,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                         news: news,
                         width: cardWidth,
                         onTap: () {
-                          showPageInfo(
-                            'Detail Berita',
-                            'Halaman detail berita sedang '
-                                'dalam tahap pengembangan.',
-                          );
+                          context.push(
+                            AppRoutes.newsDetail, 
+                            extra: news);
                         },
                       );
                     },
