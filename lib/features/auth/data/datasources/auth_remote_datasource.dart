@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/register_request.dart';
@@ -13,27 +12,51 @@ class AuthRemoteDataSource {
 
   // Register
   Future<AuthResponse> register(RegisterRequest request) async {
-    final response = await supabase.auth.signUp(
-      email: request.email.trim().toLowerCase(),
-      password: request.password,
-      data: request.toMetadata(),
+    final username = request.username.trim().toLowerCase();
+    final email = request.email.trim().toLowerCase();
+
+    // 1. Cek username melalui RPC
+    final isTaken = await supabase.rpc(
+      'is_username_taken',
+      params: {'p_username': username},
     );
-    debugPrint('USER ID: ${response.user?.id}');
-    debugPrint('SESSION: ${response.session != null}');
-    debugPrint('CURRENT SESSION: ${supabase.auth.currentSession != null}');
 
-    if (response.user == null) {
-      throw const AuthException('User tidak ditemukan setelah registrasi');
+    if (isTaken == true) {
+      throw const AuthException('Username sudah digunakan.');
     }
 
-    if (response.session == null) {
-      throw const AuthException(
-        'Registrasi berhasil, tetapi session tidak tersedia. '
-        'Periksa konfigurasi Email Confirmation di Supabase.',
+    try {
+      // 2. Registrasi Supabase Auth
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: request.password,
+        data: {...request.toMetadata(), 'username': username},
       );
-    }
 
-    return response;
+      if (response.user == null) {
+        throw const AuthException('User tidak ditemukan setelah registrasi');
+      }
+
+      if (response.session == null) {
+        throw const AuthException(
+          'Session tidak tersedia. Periksa konfigurasi Email Confirmation.',
+        );
+      }
+
+      return response;
+    } on AuthException catch (e) {
+      // 3. Custom error email duplikat
+      final message = e.message.toLowerCase();
+
+      if (message.contains('already registered') ||
+          message.contains('already exists')) {
+        throw const AuthException(
+          'Email sudah terdaftar. Silakan gunakan email lain.',
+        );
+      }
+
+      rethrow;
+    }
   }
 
   // Login
