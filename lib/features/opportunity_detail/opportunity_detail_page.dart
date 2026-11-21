@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../auth/presentation/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_action_button.dart';
@@ -13,12 +15,23 @@ import '../../core/widgets/app_dialog.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/expandable_description.dart';
+import '../../core/widgets/guest_access_guard.dart';
 import '../../data/models/opportunity.dart';
 
-class OpportunityDetailPage extends StatelessWidget {
+class OpportunityDetailPage extends ConsumerStatefulWidget {
   final Opportunity opportunity;
 
   const OpportunityDetailPage({super.key, required this.opportunity});
+
+  @override
+  ConsumerState<OpportunityDetailPage> createState() =>
+      _OpportunityDetailPageState();
+}
+
+class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
+  bool _isSaved = false;
+
+  Opportunity get opportunity => widget.opportunity;
 
   String _getCategoryName(String category) {
     switch (category.toLowerCase()) {
@@ -359,9 +372,7 @@ class OpportunityDetailPage extends StatelessWidget {
     final source = opportunity.source?.trim();
 
     return AppBadge(
-      label: source?.isNotEmpty == true 
-        ? source
-        ! : 'Sumber belum tersedia',
+      label: source?.isNotEmpty == true ? source! : 'Sumber belum tersedia',
       type: AppBadgeType.success,
       icon: Icons.verified_rounded,
       fullWidth: true,
@@ -399,14 +410,29 @@ class OpportunityDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    WidgetRef ref,
+    bool isGuest,
+  ) {
     return Row(
       children: [
         Expanded(
           child: AppActionButton(
-            label: 'Simpan',
-            icon: Icons.bookmark_outline_rounded,
-            onPressed: () {},
+            label: _isSaved ? 'Tersimpan' : 'Simpan',
+            icon: _isSaved
+                ? Icons.bookmark_rounded
+                : Icons.bookmark_outline_rounded,
+            onPressed: () async {
+              if (isGuest) {
+                await GuestAccessGuard.check(context, ref);
+                return;
+              }
+
+              setState(() {
+                _isSaved = !_isSaved;
+              });
+            },
           ),
         ),
         const SizedBox(width: 8),
@@ -424,7 +450,14 @@ class OpportunityDetailPage extends StatelessWidget {
             icon: Icons.report_gmailerrorred_outlined,
             iconColor: AppColors.error,
             textColor: AppColors.error,
-            onPressed: () => _showReportBottomSheet(context),
+            onPressed: () async {
+              if (isGuest) {
+                await GuestAccessGuard.check(context, ref);
+                return;
+              }
+
+              _showReportBottomSheet(context);
+            },
           ),
         ),
       ],
@@ -501,6 +534,11 @@ class OpportunityDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final user = authState.asData?.value;
+
+    final isGuest = !authState.isLoading && !authState.hasError && user == null;
+
     final categoryColor = AppColors.categoryColor(opportunity.category);
 
     final categoryBackground = AppColors.categoryBackground(
@@ -637,7 +675,7 @@ class OpportunityDetailPage extends StatelessWidget {
                       const SizedBox(height: 18),
 
                       // Button Action.
-                      _buildActionButtons(context),
+                      _buildActionButtons(context, ref, isGuest),
                     ],
                   ),
                 ),

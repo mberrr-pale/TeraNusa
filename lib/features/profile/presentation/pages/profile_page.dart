@@ -72,39 +72,48 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(14, 15, 14, 96),
+          padding: const EdgeInsets.only(top: 0, bottom: 96),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const AppHeader(),
 
-              // PROFILE HEADER
-              ProfileHeader(
-                user: user,
-                isOnline: isOnline,
-                isUploadingAvatar: _isUploadingAvatar,
-                onAvatarTap: () {
-                  _showAvatarPreview(user);
-                },
-                onDeleteAvatar: _deleteAvatar,
+              const SizedBox(height: 16),
+
+              // PROFILE CONTENT
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ProfileHeader(
+                      user: user,
+                      isOnline: isOnline,
+                      isUploadingAvatar: _isUploadingAvatar,
+                      onAvatarTap: () {
+                        _showAvatarPreview(user);
+                      },
+                      onDeleteAvatar: _deleteAvatar,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // PROFILE MENU
+                    ProfileMenu(
+                      isOnline: isOnline,
+                      onEditProfile: _showEditProfile,
+                      onChangePassword: _showChangePassword,
+                      onSaved: _openSavedPage,
+                      onOffline: _showOfflineInfo,
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // LOGOUT BUTTON
+                    ProfileLogoutButton(isOnline: isOnline, onPressed: _logout),
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 20),
-
-              // PROFILE MENU
-              ProfileMenu(
-                isOnline: isOnline,
-                onEditProfile: _showEditProfile,
-                onChangePassword: _showChangePassword,
-                onSync: _showSyncInfo,
-                onHelp: _showHelpInfo,
-                onOffline: _showOfflineInfo,
-              ),
-
-              const SizedBox(height: 18),
-
-              // LOGOUT BUTTON
-              ProfileLogoutButton(isOnline: isOnline, onPressed: _logout),
             ],
           ),
         ),
@@ -332,6 +341,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
+  // ================= SAVED PAGE =================
+
+  void _openSavedPage() {
+    context.pushNamed('saved');
+  }
+
   // ================= OFFLINE INFO =================
 
   void _showOfflineInfo() {
@@ -343,57 +358,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           'Silakan periksa koneksi internet kamu '
           'dan coba kembali.',
       type: AppDialogType.warning,
-    );
-  }
-
-  // ================= SYNC INFO =================
-
-  void _showSyncInfo() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Sinkronisasi Offline'),
-          content: const Text(
-            'Data profil yang tersimpan di perangkat '
-            'dapat ditampilkan ketika tidak ada '
-            'koneksi internet.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Mengerti'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // ================= HELP INFO =================
-
-  void _showHelpInfo() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Bantuan'),
-          content: const Text(
-            'Pusat bantuan aplikasi TeraNusa '
-            'sedang dalam tahap pengembangan.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Mengerti'),
-            ),
-          ],
-        );
-      },
     );
   }
 

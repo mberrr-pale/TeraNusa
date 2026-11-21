@@ -8,7 +8,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/widgets/app_bottom_navigation.dart';
-import '../../core/widgets/app_dialog.dart';
 import '../../core/widgets/opportunity_card.dart';
 import '../../core/widgets/news_card.dart';
 import '../../core/widgets/states/app_loading.dart';
@@ -55,12 +54,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     await Future.wait([_opportunitiesFuture, _newsFuture]);
   }
 
-  // REUSABLE DIALOG
-
-  void _showPageInfo(String title, String message) {
-    AppDialog.show(context, title: title, message: message);
-  }
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -95,7 +88,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
 
-                    _buildOpportunityList(),
+                    _buildOpportunityList(isGuest),
 
                     SliverToBoxAdapter(
                       child: Padding(
@@ -347,7 +340,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   // OPPORTUNITY LIST
 
-  Widget _buildOpportunityList() {
+  Widget _buildOpportunityList(bool isGuest) {
     return FutureBuilder<List<Opportunity>>(
       future: _opportunitiesFuture,
       builder: (context, snapshot) {
@@ -402,18 +395,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                   opportunity: opportunity,
                   regionName:
                       opportunity.regionName ?? 'Wilayah tidak diketahui',
+                  isGuest: isGuest,
                   onTap: () {
                     context.push(
                       AppRoutes.opportunityDetail,
                       extra: opportunity,
                     );
                   },
-                  onBookmarkTap: () {
-                    _showPageInfo(
-                      'Simpan Peluang',
-                      'Fitur menyimpan peluang sedang '
-                          'dalam tahap pengembangan.',
-                    );
+                  onBookmarkTap: () async {
+                    await GuestAccessGuard.check(context, ref);
                   },
                 ),
               );
@@ -538,9 +528,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         news: news,
                         width: cardWidth,
                         onTap: () {
-                          context.push(
-                            AppRoutes.newsDetail, 
-                            extra: news);
+                          context.push(AppRoutes.newsDetail, extra: news);
                         },
                       );
                     },

@@ -101,8 +101,8 @@ class ProfileHeader extends StatelessWidget {
               top: 15,
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
+                  horizontal: 15,
+                  vertical: 8,
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.primaryLight,
@@ -111,12 +111,12 @@ class ProfileHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(roleIcon, color: AppColors.primary, size: 12),
+                    Icon(roleIcon, color: AppColors.primary, size: 16),
                     const SizedBox(width: 5),
                     Text(
                       role,
                       style: const TextStyle(
-                        fontSize: 9,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                       ),

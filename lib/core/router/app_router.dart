@@ -17,6 +17,7 @@ import '../../features/opportunity_detail/opportunity_detail_page.dart';
 import '../../data/models/opportunity.dart';
 import '../../data/models/news.dart';
 import '../../features/news/news_detail_page.dart';
+import '../../features/saved/presentation/pages/saved_page.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -153,6 +154,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return const ProfilePage();
         },
+      ),
+
+      GoRoute(
+        path: AppRoutes.saved,
+        name: 'saved',
+        builder: (context, state) => const SavedPage(),
       ),
     ],
 

@@ -8,8 +8,7 @@ class ProfileMenu extends StatelessWidget {
 
   final VoidCallback onEditProfile;
   final VoidCallback onChangePassword;
-  final VoidCallback onSync;
-  final VoidCallback onHelp;
+  final VoidCallback onSaved;
   final VoidCallback onOffline;
 
   const ProfileMenu({
@@ -17,9 +16,8 @@ class ProfileMenu extends StatelessWidget {
     required this.isOnline,
     required this.onEditProfile,
     required this.onChangePassword,
-    required this.onSync,
+    required this.onSaved,
     required this.onOffline,
-    required this.onHelp,
   });
 
   @override
@@ -32,9 +30,9 @@ class ProfileMenu extends StatelessWidget {
           child: Text(
             'Akun Pencari',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 18,
               color: AppColors.heading,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -71,18 +69,11 @@ class ProfileMenu extends StatelessWidget {
               ),
 
               ProfileMenuItem(
-                icon: Icons.grid_view_rounded,
-                title: 'Sinkronisasi offline',
-                subtitle: 'Kelola data profil offline',
-                onTap: onSync,
-              ),
-
-              ProfileMenuItem(
-                icon: Icons.help_outline,
-                title: 'Bantuan',
-                subtitle: 'Tanyakan hal terkait aplikasi TeraNusa',
+                icon: Icons.bookmark_added_rounded,
+                title: 'Tersimpan',
+                subtitle: 'Lihat Peluang yang kamu simpan',
                 isLast: true,
-                onTap: onHelp,
+                onTap: onSaved,
               ),
             ],
           ),

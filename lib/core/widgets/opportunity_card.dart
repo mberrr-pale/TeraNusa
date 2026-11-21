@@ -5,9 +5,10 @@ import '../theme/app_text_styles.dart';
 import '../../data/models/opportunity.dart';
 import 'verification_badge.dart';
 
-class OpportunityCard extends StatelessWidget {
+class OpportunityCard extends StatefulWidget {
   final Opportunity opportunity;
   final String regionName;
+  final bool isGuest;
   final VoidCallback? onTap;
   final VoidCallback? onBookmarkTap;
 
@@ -15,9 +16,20 @@ class OpportunityCard extends StatelessWidget {
     super.key,
     required this.opportunity,
     required this.regionName,
+    this.isGuest = false,
     this.onTap,
     this.onBookmarkTap,
   });
+
+  @override
+  State<OpportunityCard> createState() => _OpportunityCardState();
+}
+
+class _OpportunityCardState extends State<OpportunityCard> {
+  bool _isSaved = false;
+
+  Opportunity get opportunity => widget.opportunity;
+  String get regionName => widget.regionName;
 
   IconData _getCategoryIcon(String category) {
     switch (category) {
@@ -83,7 +95,7 @@ class OpportunityCard extends StatelessWidget {
     final categoryColor = _getCategoryColor(opportunity.category);
 
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -202,23 +214,39 @@ class OpportunityCard extends StatelessWidget {
 
             // BOOKMARK
             Container(
-              width: 32,
-              height: 32,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.border),
+                border: Border.all(
+                  color: _isSaved ? AppColors.primary : AppColors.border,
+                ),
                 borderRadius: BorderRadius.circular(10),
+                color: _isSaved
+                    ? AppColors.primary.withValues(alpha: 0.08)
+                    : AppColors.white,
               ),
               child: IconButton(
-                onPressed: onBookmarkTap,
+                onPressed: () {
+                  if (widget.isGuest) {
+                    widget.onBookmarkTap?.call();
+                    return;
+                  }
+
+                  setState(() {
+                    _isSaved = !_isSaved;
+                  });
+                },
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
                   width: 32,
                   height: 32,
                 ),
-                icon: const Icon(
-                  Icons.bookmark_border,
-                  color: AppColors.secondaryText,
-                  size: 18,
+                icon: Icon(
+                  _isSaved
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_border_rounded,
+                  color: _isSaved ? AppColors.primary : AppColors.secondaryText,
+                  size: 24,
                 ),
               ),
             ),
