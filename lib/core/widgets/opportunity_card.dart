@@ -9,6 +9,7 @@ class OpportunityCard extends StatefulWidget {
   final Opportunity opportunity;
   final String regionName;
   final bool isGuest;
+  final bool isSaved;
   final VoidCallback? onTap;
   final VoidCallback? onBookmarkTap;
 
@@ -17,6 +18,7 @@ class OpportunityCard extends StatefulWidget {
     required this.opportunity,
     required this.regionName,
     this.isGuest = false,
+    this.isSaved = false,
     this.onTap,
     this.onBookmarkTap,
   });
@@ -26,8 +28,6 @@ class OpportunityCard extends StatefulWidget {
 }
 
 class _OpportunityCardState extends State<OpportunityCard> {
-  bool _isSaved = false;
-
   Opportunity get opportunity => widget.opportunity;
   String get regionName => widget.regionName;
 
@@ -218,34 +218,27 @@ class _OpportunityCardState extends State<OpportunityCard> {
               height: 36,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: _isSaved ? AppColors.primary : AppColors.border,
+                  color: widget.isSaved ? AppColors.primary : AppColors.border,
                 ),
                 borderRadius: BorderRadius.circular(10),
-                color: _isSaved
+                color: widget.isSaved
                     ? AppColors.primary.withValues(alpha: 0.08)
                     : AppColors.white,
               ),
               child: IconButton(
-                onPressed: () {
-                  if (widget.isGuest) {
-                    widget.onBookmarkTap?.call();
-                    return;
-                  }
-
-                  setState(() {
-                    _isSaved = !_isSaved;
-                  });
-                },
+                onPressed: widget.onBookmarkTap,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
                   width: 32,
                   height: 32,
                 ),
                 icon: Icon(
-                  _isSaved
+                  widget.isSaved
                       ? Icons.bookmark_rounded
                       : Icons.bookmark_border_rounded,
-                  color: _isSaved ? AppColors.primary : AppColors.secondaryText,
+                  color: widget.isSaved
+                      ? AppColors.primary
+                      : AppColors.secondaryText,
                   size: 24,
                 ),
               ),

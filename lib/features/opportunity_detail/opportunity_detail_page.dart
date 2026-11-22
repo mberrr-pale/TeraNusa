@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/presentation/providers/auth_provider.dart';
+import '../saved/presentation/providers/saved_opportunity_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_action_button.dart';
@@ -29,8 +30,6 @@ class OpportunityDetailPage extends ConsumerStatefulWidget {
 }
 
 class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
-  bool _isSaved = false;
-
   Opportunity get opportunity => widget.opportunity;
 
   String _getCategoryName(String category) {
@@ -414,13 +413,14 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
     BuildContext context,
     WidgetRef ref,
     bool isGuest,
+    bool isSaved,
   ) {
     return Row(
       children: [
         Expanded(
           child: AppActionButton(
-            label: _isSaved ? 'Tersimpan' : 'Simpan',
-            icon: _isSaved
+            label: isSaved ? 'Tersimpan' : 'Simpan',
+            icon: isSaved
                 ? Icons.bookmark_rounded
                 : Icons.bookmark_outline_rounded,
             onPressed: () async {
@@ -429,9 +429,31 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
                 return;
               }
 
-              setState(() {
-                _isSaved = !_isSaved;
-              });
+              final opportunityId = opportunity.opportunityId;
+
+              if (opportunityId == null || opportunityId.isEmpty) {
+                AppSnackBar.showError(
+                  context,
+                  title: 'Gagal menyimpan',
+                  message: 'ID peluang tidak ditemukan.',
+                );
+                return;
+              }
+
+              try {
+                await ref
+                    .read(savedOpportunityIdsProvider.notifier)
+                    .toggleSavedOpportunity(opportunityId);
+              } catch (e) {
+                if (!context.mounted) return;
+
+                AppSnackBar.showError(
+                  context,
+                  title: 'Gagal menyimpan',
+                  message:
+                      'Terjadi kesalahan saat memperbarui peluang tersimpan.',
+                );
+              }
             },
           ),
         ),
@@ -535,9 +557,17 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final savedIdsState = ref.watch(savedOpportunityIdsProvider);
+
     final user = authState.asData?.value;
 
     final isGuest = !authState.isLoading && !authState.hasError && user == null;
+
+    final savedIds = savedIdsState.asData?.value ?? <String>{};
+
+    final isSaved =
+        opportunity.opportunityId != null &&
+        savedIds.contains(opportunity.opportunityId);
 
     final categoryColor = AppColors.categoryColor(opportunity.category);
 
@@ -675,7 +705,7 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
                       const SizedBox(height: 18),
 
                       // Button Action.
-                      _buildActionButtons(context, ref, isGuest),
+                      _buildActionButtons(context, ref, isGuest, isSaved),
                     ],
                   ),
                 ),

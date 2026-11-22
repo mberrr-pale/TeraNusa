@@ -19,6 +19,7 @@ import '../../data/models/news.dart';
 import '../../data/repositories/news_repository.dart';
 import '../../core/widgets/guest_access_guard.dart';
 import '../auth/presentation/providers/auth_provider.dart';
+import '../saved/presentation/providers/saved_opportunity_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -57,9 +58,12 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final savedIdsState = ref.watch(savedOpportunityIdsProvider);
 
     final user = authState.asData?.value;
     final isGuest = !authState.isLoading && !authState.hasError && user == null;
+
+    final savedIds = savedIdsState.asData?.value ?? <String>{};
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -88,7 +92,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
 
-                    _buildOpportunityList(isGuest),
+                    _buildOpportunityList(isGuest, savedIds),
 
                     SliverToBoxAdapter(
                       child: Padding(
@@ -340,7 +344,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   // OPPORTUNITY LIST
 
-  Widget _buildOpportunityList(bool isGuest) {
+  Widget _buildOpportunityList(bool isGuest, Set<String> savedIds) {
     return FutureBuilder<List<Opportunity>>(
       future: _opportunitiesFuture,
       builder: (context, snapshot) {
@@ -396,6 +400,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                   regionName:
                       opportunity.regionName ?? 'Wilayah tidak diketahui',
                   isGuest: isGuest,
+                  isSaved:
+                      opportunity.opportunityId != null &&
+                      savedIds.contains(opportunity.opportunityId),
                   onTap: () {
                     context.push(
                       AppRoutes.opportunityDetail,
@@ -403,7 +410,35 @@ class _HomePageState extends ConsumerState<HomePage> {
                     );
                   },
                   onBookmarkTap: () async {
-                    await GuestAccessGuard.check(context, ref);
+                    if (isGuest) {
+                      await GuestAccessGuard.check(context, ref);
+                      return;
+                    }
+
+                    final opportunityId = opportunity.opportunityId;
+
+                    if (opportunityId == null || opportunityId.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('ID peluang tidak ditemukan.'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    try {
+                      await ref
+                          .read(savedOpportunityIdsProvider.notifier)
+                          .toggleSavedOpportunity(opportunityId);
+                    } catch (e) {
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Gagal memperbarui peluang tersimpan.'),
+                        ),
+                      );
+                    }
                   },
                 ),
               );

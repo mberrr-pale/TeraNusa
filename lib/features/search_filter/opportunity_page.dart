@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../auth/presentation/providers/auth_provider.dart';
+import '../saved/presentation/providers/saved_opportunity_provider.dart';
 import '../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -11,20 +14,20 @@ import '../../core/widgets/opportunity_card.dart';
 import '../../core/widgets/states/app_loading.dart';
 import '../../core/widgets/states/app_error.dart';
 import '../../core/widgets/states/app_empty.dart';
-import '../../data/repositories/opportunity_repository.dart';
-import '../../data/models/opportunity.dart';
-import '../../core/widgets/app_dialog.dart';
 import '../../core/widgets/app_bottom_sheet.dart';
 import '../../core/widgets/filter_summary_badge.dart';
+import '../../core/widgets/guest_access_guard.dart';
+import '../../data/repositories/opportunity_repository.dart';
+import '../../data/models/opportunity.dart';
 
-class OpportunityPage extends StatefulWidget {
+class OpportunityPage extends ConsumerStatefulWidget {
   const OpportunityPage({super.key});
 
   @override
-  State<OpportunityPage> createState() => _OpportunityPageState();
+  ConsumerState<OpportunityPage> createState() => _OpportunityPageState();
 }
 
-class _OpportunityPageState extends State<OpportunityPage> {
+class _OpportunityPageState extends ConsumerState<OpportunityPage> {
   final OpportunityRepository _repository = OpportunityRepository(
     Supabase.instance.client,
   );
@@ -217,10 +220,6 @@ class _OpportunityPageState extends State<OpportunityPage> {
     );
   }
 
-  void _showPageInfo(String title, String message) {
-    AppDialog.show(context, title: title, message: message);
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -229,6 +228,13 @@ class _OpportunityPageState extends State<OpportunityPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final savedIdsState = ref.watch(savedOpportunityIdsProvider);
+
+    final user = authState.asData?.value;
+    final isGuest = !authState.isLoading && !authState.hasError && user == null;
+
+    final savedIds = savedIdsState.asData?.value ?? <String>{};
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -386,17 +392,65 @@ class _OpportunityPageState extends State<OpportunityPage> {
                                       regionName:
                                           opportunity.regionName ??
                                           'Wilayah tidak diketahui',
+                                      isGuest: isGuest,
+                                      isSaved:
+                                          opportunity.opportunityId != null &&
+                                          savedIds.contains(
+                                            opportunity.opportunityId,
+                                          ),
                                       onTap: () {
                                         context.push(
                                           AppRoutes.opportunityDetail,
                                           extra: opportunity,
                                         );
                                       },
-                                      onBookmarkTap: () {
-                                        _showPageInfo(
-                                          'Simpan Peluang',
-                                          'Fitur menyimpan peluang sedang dalam tahap pengembangan.',
-                                        );
+                                      onBookmarkTap: () async {
+                                        if (isGuest) {
+                                          await GuestAccessGuard.check(
+                                            context,
+                                            ref,
+                                          );
+                                          return;
+                                        }
+
+                                        final opportunityId =
+                                            opportunity.opportunityId;
+
+                                        if (opportunityId == null ||
+                                            opportunityId.isEmpty) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'ID peluang tidak ditemukan.',
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        try {
+                                          await ref
+                                              .read(
+                                                savedOpportunityIdsProvider
+                                                    .notifier,
+                                              )
+                                              .toggleSavedOpportunity(
+                                                opportunityId,
+                                              );
+                                        } catch (e) {
+                                          if (!context.mounted) return;
+
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Gagal memperbarui peluang tersimpan.',
+                                                  ),
+                                                ),
+                                              );
+                                        }
                                       },
                                     );
                                   },
