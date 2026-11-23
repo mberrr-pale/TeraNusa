@@ -17,6 +17,8 @@ import '../../core/widgets/app_header.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/expandable_description.dart';
 import '../../core/widgets/guest_access_guard.dart';
+import '../../core/utils/bookmark_action_helper.dart';
+import '../../core/providers/internet_provider.dart';
 import '../../data/models/opportunity.dart';
 
 class OpportunityDetailPage extends ConsumerStatefulWidget {
@@ -31,6 +33,16 @@ class OpportunityDetailPage extends ConsumerStatefulWidget {
 
 class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
   Opportunity get opportunity => widget.opportunity;
+
+  bool get _isOnline => ref.read(internetStatusProvider).asData?.value == true;
+
+  void _showOfflineMessage(BuildContext context) {
+    AppSnackBar.showError(
+      context,
+      title: 'Koneksi internet diperlukan',
+      message: 'Hubungkan ke internet untuk menggunakan fitur ini.',
+    );
+  }
 
   String _getCategoryName(String category) {
     switch (category.toLowerCase()) {
@@ -259,8 +271,23 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
   }
 
   Widget _buildHeroImage(Color categoryColor, Color categoryBackground) {
+    final localImageBytes = opportunity.localImageBytes;
     final imageUrl = opportunity.imageUrl;
 
+    // Prioritaskan gambar lokal agar tetap tersedia saat offline.
+    if (localImageBytes != null && localImageBytes.isNotEmpty) {
+      return Image.memory(
+        localImageBytes,
+        width: double.infinity,
+        height: 260,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildImageFallback(categoryColor, categoryBackground);
+        },
+      );
+    }
+
+    // Jika tidak ada gambar lokal, gunakan URL gambar.
     if (imageUrl == null || imageUrl.trim().isEmpty) {
       return _buildImageFallback(categoryColor, categoryBackground);
     }
@@ -429,31 +456,12 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
                 return;
               }
 
-              final opportunityId = opportunity.opportunityId;
-
-              if (opportunityId == null || opportunityId.isEmpty) {
-                AppSnackBar.showError(
-                  context,
-                  title: 'Gagal menyimpan',
-                  message: 'ID peluang tidak ditemukan.',
-                );
-                return;
-              }
-
-              try {
-                await ref
-                    .read(savedOpportunityIdsProvider.notifier)
-                    .toggleSavedOpportunity(opportunityId);
-              } catch (e) {
-                if (!context.mounted) return;
-
-                AppSnackBar.showError(
-                  context,
-                  title: 'Gagal menyimpan',
-                  message:
-                      'Terjadi kesalahan saat memperbarui peluang tersimpan.',
-                );
-              }
+              await BookmarkActionHelper.toggle(
+                context: context,
+                ref: ref,
+                opportunityId: opportunity.opportunityId,
+                isSaved: isSaved,
+              );
             },
           ),
         ),
@@ -462,7 +470,14 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
           child: AppActionButton(
             label: 'Bagikan',
             icon: Icons.share_outlined,
-            onPressed: _shareOpportunity,
+            onPressed: () {
+              if (!_isOnline) {
+                _showOfflineMessage(context);
+                return;
+              }
+
+              _shareOpportunity();
+            },
           ),
         ),
         const SizedBox(width: 8),
@@ -473,6 +488,11 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
             iconColor: AppColors.error,
             textColor: AppColors.error,
             onPressed: () async {
+              if (!_isOnline) {
+                _showOfflineMessage(context);
+                return;
+              }
+
               if (isGuest) {
                 await GuestAccessGuard.check(context, ref);
                 return;
@@ -486,7 +506,44 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
     );
   }
 
+  Future<void> _showContactConfirmation(BuildContext context) async {
+    // Periksa koneksi sebelum menampilkan dialog.
+    if (!_isOnline) {
+      _showOfflineMessage(context);
+      return;
+    }
+
+    final shouldContinue = await AppDialog.show(
+      context,
+      title: 'Peringatan Keamanan',
+      message:
+          '\nKamu akan diarahkan ke aplikasi atau situs eksternal '
+          'untuk menghubungi sumber peluang.\n\n'
+          'Pastikan kamu tetap berhati-hati.\n'
+          'Jangan membagikan informasi pribadi yang sensitif, '
+          'dan waspadai permintaan biaya yang tidak jelas.',
+      type: AppDialogType.warning,
+      confirmLabel: 'Ya, Lanjutkan',
+      cancelLabel: 'Batal',
+    );
+
+    // Periksa kembali koneksi setelah dialog ditutup.
+    if (shouldContinue == true && context.mounted) {
+      if (!_isOnline) {
+        _showOfflineMessage(context);
+        return;
+      }
+
+      await _contactSource(context);
+    }
+  }
+
   Future<void> _contactSource(BuildContext context) async {
+    if (!_isOnline) {
+      _showOfflineMessage(context);
+      return;
+    }
+
     final contact = opportunity.contact?.trim();
 
     if (contact == null || contact.isEmpty) {
@@ -531,26 +588,6 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
           message: 'Silakan coba lagi nanti.',
         );
       }
-    }
-  }
-
-  Future<void> _showContactConfirmation(BuildContext context) async {
-    final shouldContinue = await AppDialog.show(
-      context,
-      title: 'Peringatan Keamanan',
-      message:
-          '\nKamu akan diarahkan ke aplikasi atau situs eksternal '
-          'untuk menghubungi sumber peluang.\n\n'
-          'Pastikan kamu tetap berhati-hati.\n'
-          'Jangan membagikan informasi pribadi yang sensitif, '
-          'dan waspadai permintaan biaya yang tidak jelas.',
-      type: AppDialogType.warning,
-      confirmLabel: 'Ya, Lanjutkan',
-      cancelLabel: 'Batal',
-    );
-
-    if (shouldContinue == true && context.mounted) {
-      await _contactSource(context);
     }
   }
 

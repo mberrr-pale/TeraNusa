@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class Opportunity {
   final String? opportunityId;
   final String userId;
@@ -9,6 +11,7 @@ class Opportunity {
   final String? source;
   final String? contact;
   final String? imageUrl;
+  final Uint8List? localImageBytes;
   final String status;
   final DateTime? createdAt;
   final String? regionName;
@@ -26,6 +29,7 @@ class Opportunity {
     this.source,
     this.contact,
     this.imageUrl,
+    this.localImageBytes,
     this.status = 'active',
     this.createdAt,
     this.regionName,

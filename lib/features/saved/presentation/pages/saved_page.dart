@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/bookmark_action_helper.dart';
 import '../../../../core/widgets/app_header.dart';
+import '../../../../core/widgets/states/app_error.dart';
 import '../../../../core/widgets/app_bottom_navigation.dart';
 import '../../../../core/widgets/opportunity_card.dart';
 import '../providers/saved_opportunity_provider.dart';
@@ -27,46 +29,11 @@ class SavedPage extends ConsumerWidget {
               child: savedOpportunities.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
 
-                error: (error, stackTrace) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          size: 48,
-                          color: AppColors.error,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Gagal Memuat Peluang Tersimpan',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.heading,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Silakan coba muat ulang halaman.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.secondaryText,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            ref.invalidate(savedOpportunitiesProvider);
-                          },
-                          child: const Text('Coba Lagi'),
-                        ),
-                      ],
-                    ),
-                  ),
+                error: (error, stackTrace) => AppError(
+                  message: 'Gagal memuat peluang tersimpan.',
+                  onRetry: () {
+                    ref.invalidate(savedOpportunitiesProvider);
+                  },
                 ),
 
                 data: (opportunities) {
@@ -127,32 +94,12 @@ class SavedPage extends ConsumerWidget {
                           );
                         },
                         onBookmarkTap: () async {
-                          final opportunityId = opportunity.opportunityId;
-
-                          if (opportunityId == null || opportunityId.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('ID peluang tidak ditemukan.'),
-                              ),
-                            );
-                            return;
-                          }
-
-                          try {
-                            await ref
-                                .read(savedOpportunityIdsProvider.notifier)
-                                .toggleSavedOpportunity(opportunityId);
-                          } catch (e) {
-                            if (!context.mounted) return;
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Gagal menghapus peluang dari daftar tersimpan.',
-                                ),
-                              ),
-                            );
-                          }
+                          await BookmarkActionHelper.toggle(
+                            context: context,
+                            ref: ref,
+                            opportunityId: opportunity.opportunityId,
+                            isSaved: true,
+                          );
                         },
                       );
                     },

@@ -8,6 +8,7 @@ import '../saved/presentation/providers/saved_opportunity_provider.dart';
 import '../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/bookmark_action_helper.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/widgets/app_bottom_navigation.dart';
 import '../../core/widgets/opportunity_card.dart';
@@ -387,17 +388,19 @@ class _OpportunityPageState extends ConsumerState<OpportunityPage> {
                                   itemBuilder: (context, index) {
                                     final opportunity = opportunities[index];
 
+                                    final isSaved =
+                                        opportunity.opportunityId != null &&
+                                        savedIds.contains(
+                                          opportunity.opportunityId,
+                                        );
+
                                     return OpportunityCard(
                                       opportunity: opportunity,
                                       regionName:
                                           opportunity.regionName ??
                                           'Wilayah tidak diketahui',
                                       isGuest: isGuest,
-                                      isSaved:
-                                          opportunity.opportunityId != null &&
-                                          savedIds.contains(
-                                            opportunity.opportunityId,
-                                          ),
+                                      isSaved: isSaved,
                                       onTap: () {
                                         context.push(
                                           AppRoutes.opportunityDetail,
@@ -413,44 +416,13 @@ class _OpportunityPageState extends ConsumerState<OpportunityPage> {
                                           return;
                                         }
 
-                                        final opportunityId =
-                                            opportunity.opportunityId;
-
-                                        if (opportunityId == null ||
-                                            opportunityId.isEmpty) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'ID peluang tidak ditemukan.',
-                                              ),
-                                            ),
-                                          );
-                                          return;
-                                        }
-
-                                        try {
-                                          await ref
-                                              .read(
-                                                savedOpportunityIdsProvider
-                                                    .notifier,
-                                              )
-                                              .toggleSavedOpportunity(
-                                                opportunityId,
-                                              );
-                                        } catch (e) {
-                                          if (!context.mounted) return;
-
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Gagal memperbarui peluang tersimpan.',
-                                                  ),
-                                                ),
-                                              );
-                                        }
+                                        await BookmarkActionHelper.toggle(
+                                          context: context,
+                                          ref: ref,
+                                          opportunityId:
+                                              opportunity.opportunityId,
+                                          isSaved: isSaved,
+                                        );
                                       },
                                     );
                                   },

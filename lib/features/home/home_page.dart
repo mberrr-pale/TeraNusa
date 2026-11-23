@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/bookmark_action_helper.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/widgets/app_bottom_navigation.dart';
 import '../../core/widgets/opportunity_card.dart';
@@ -13,11 +14,11 @@ import '../../core/widgets/news_card.dart';
 import '../../core/widgets/states/app_loading.dart';
 import '../../core/widgets/states/app_error.dart';
 import '../../core/widgets/states/app_empty.dart';
-import '../../data/models/opportunity.dart';
-import '../../data/repositories/opportunity_repository.dart';
-import '../../data/models/news.dart';
-import '../../data/repositories/news_repository.dart';
 import '../../core/widgets/guest_access_guard.dart';
+import '../../data/models/opportunity.dart';
+import '../../data/models/news.dart';
+import '../../data/repositories/opportunity_repository.dart';
+import '../../data/repositories/news_repository.dart';
 import '../auth/presentation/providers/auth_provider.dart';
 import '../saved/presentation/providers/saved_opportunity_provider.dart';
 
@@ -393,6 +394,10 @@ class _HomePageState extends ConsumerState<HomePage> {
             delegate: SliverChildBuilderDelegate((context, index) {
               final opportunity = opportunities[index];
 
+              final isSaved =
+                  opportunity.opportunityId != null &&
+                  savedIds.contains(opportunity.opportunityId);
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 9),
                 child: OpportunityCard(
@@ -400,9 +405,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   regionName:
                       opportunity.regionName ?? 'Wilayah tidak diketahui',
                   isGuest: isGuest,
-                  isSaved:
-                      opportunity.opportunityId != null &&
-                      savedIds.contains(opportunity.opportunityId),
+                  isSaved: isSaved,
                   onTap: () {
                     context.push(
                       AppRoutes.opportunityDetail,
@@ -415,30 +418,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                       return;
                     }
 
-                    final opportunityId = opportunity.opportunityId;
-
-                    if (opportunityId == null || opportunityId.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('ID peluang tidak ditemukan.'),
-                        ),
-                      );
-                      return;
-                    }
-
-                    try {
-                      await ref
-                          .read(savedOpportunityIdsProvider.notifier)
-                          .toggleSavedOpportunity(opportunityId);
-                    } catch (e) {
-                      if (!context.mounted) return;
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Gagal memperbarui peluang tersimpan.'),
-                        ),
-                      );
-                    }
+                    await BookmarkActionHelper.toggle(
+                      context: context,
+                      ref: ref,
+                      opportunityId: opportunity.opportunityId,
+                      isSaved: isSaved,
+                    );
                   },
                 ),
               );
