@@ -2012,6 +2012,1090 @@ class SavedOpportunitiesCompanion extends UpdateCompanion<SavedOpportunity> {
   }
 }
 
+class $ArchivedOpportunitiesTable extends ArchivedOpportunities
+    with TableInfo<$ArchivedOpportunitiesTable, ArchivedOpportunity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArchivedOpportunitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _opportunityIdMeta = const VerificationMeta(
+    'opportunityId',
+  );
+  @override
+  late final GeneratedColumn<String> opportunityId = GeneratedColumn<String>(
+    'opportunity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _opportunityOwnerIdMeta =
+      const VerificationMeta('opportunityOwnerId');
+  @override
+  late final GeneratedColumn<String> opportunityOwnerId =
+      GeneratedColumn<String>(
+        'opportunity_owner_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _regionIdMeta = const VerificationMeta(
+    'regionId',
+  );
+  @override
+  late final GeneratedColumn<String> regionId = GeneratedColumn<String>(
+    'region_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _regionNameMeta = const VerificationMeta(
+    'regionName',
+  );
+  @override
+  late final GeneratedColumn<String> regionName = GeneratedColumn<String>(
+    'region_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _regionCityMeta = const VerificationMeta(
+    'regionCity',
+  );
+  @override
+  late final GeneratedColumn<String> regionCity = GeneratedColumn<String>(
+    'region_city',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _regionProvinceMeta = const VerificationMeta(
+    'regionProvince',
+  );
+  @override
+  late final GeneratedColumn<String> regionProvince = GeneratedColumn<String>(
+    'region_province',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+    'end_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contactMeta = const VerificationMeta(
+    'contact',
+  );
+  @override
+  late final GeneratedColumn<String> contact = GeneratedColumn<String>(
+    'contact',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _localImageBytesMeta = const VerificationMeta(
+    'localImageBytes',
+  );
+  @override
+  late final GeneratedColumn<Uint8List> localImageBytes =
+      GeneratedColumn<Uint8List>(
+        'local_image_bytes',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('archived'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cachedAtMeta = const VerificationMeta(
+    'cachedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> cachedAt = GeneratedColumn<DateTime>(
+    'cached_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    opportunityId,
+    userId,
+    opportunityOwnerId,
+    title,
+    description,
+    category,
+    regionId,
+    regionName,
+    regionCity,
+    regionProvince,
+    endDate,
+    source,
+    contact,
+    imageUrl,
+    localImageBytes,
+    status,
+    createdAt,
+    deletedAt,
+    cachedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'archived_opportunities';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArchivedOpportunity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('opportunity_id')) {
+      context.handle(
+        _opportunityIdMeta,
+        opportunityId.isAcceptableOrUnknown(
+          data['opportunity_id']!,
+          _opportunityIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_opportunityIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('opportunity_owner_id')) {
+      context.handle(
+        _opportunityOwnerIdMeta,
+        opportunityOwnerId.isAcceptableOrUnknown(
+          data['opportunity_owner_id']!,
+          _opportunityOwnerIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('region_id')) {
+      context.handle(
+        _regionIdMeta,
+        regionId.isAcceptableOrUnknown(data['region_id']!, _regionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_regionIdMeta);
+    }
+    if (data.containsKey('region_name')) {
+      context.handle(
+        _regionNameMeta,
+        regionName.isAcceptableOrUnknown(data['region_name']!, _regionNameMeta),
+      );
+    }
+    if (data.containsKey('region_city')) {
+      context.handle(
+        _regionCityMeta,
+        regionCity.isAcceptableOrUnknown(data['region_city']!, _regionCityMeta),
+      );
+    }
+    if (data.containsKey('region_province')) {
+      context.handle(
+        _regionProvinceMeta,
+        regionProvince.isAcceptableOrUnknown(
+          data['region_province']!,
+          _regionProvinceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endDateMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('contact')) {
+      context.handle(
+        _contactMeta,
+        contact.isAcceptableOrUnknown(data['contact']!, _contactMeta),
+      );
+    }
+    if (data.containsKey('image_url')) {
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
+    }
+    if (data.containsKey('local_image_bytes')) {
+      context.handle(
+        _localImageBytesMeta,
+        localImageBytes.isAcceptableOrUnknown(
+          data['local_image_bytes']!,
+          _localImageBytesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('cached_at')) {
+      context.handle(
+        _cachedAtMeta,
+        cachedAt.isAcceptableOrUnknown(data['cached_at']!, _cachedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cachedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId, opportunityId};
+  @override
+  ArchivedOpportunity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArchivedOpportunity(
+      opportunityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}opportunity_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      opportunityOwnerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}opportunity_owner_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      regionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}region_id'],
+      )!,
+      regionName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}region_name'],
+      ),
+      regionCity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}region_city'],
+      ),
+      regionProvince: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}region_province'],
+      ),
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}end_date'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      ),
+      contact: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contact'],
+      ),
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
+      localImageBytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}local_image_bytes'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      cachedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}cached_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ArchivedOpportunitiesTable createAlias(String alias) {
+    return $ArchivedOpportunitiesTable(attachedDatabase, alias);
+  }
+}
+
+class ArchivedOpportunity extends DataClass
+    implements Insertable<ArchivedOpportunity> {
+  final String opportunityId;
+  final String userId;
+  final String opportunityOwnerId;
+  final String title;
+  final String description;
+  final String category;
+  final String regionId;
+  final String? regionName;
+  final String? regionCity;
+  final String? regionProvince;
+  final DateTime endDate;
+  final String? source;
+  final String? contact;
+  final String? imageUrl;
+  final Uint8List? localImageBytes;
+  final String status;
+  final DateTime? createdAt;
+  final DateTime? deletedAt;
+  final DateTime cachedAt;
+  const ArchivedOpportunity({
+    required this.opportunityId,
+    required this.userId,
+    required this.opportunityOwnerId,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.regionId,
+    this.regionName,
+    this.regionCity,
+    this.regionProvince,
+    required this.endDate,
+    this.source,
+    this.contact,
+    this.imageUrl,
+    this.localImageBytes,
+    required this.status,
+    this.createdAt,
+    this.deletedAt,
+    required this.cachedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['opportunity_id'] = Variable<String>(opportunityId);
+    map['user_id'] = Variable<String>(userId);
+    map['opportunity_owner_id'] = Variable<String>(opportunityOwnerId);
+    map['title'] = Variable<String>(title);
+    map['description'] = Variable<String>(description);
+    map['category'] = Variable<String>(category);
+    map['region_id'] = Variable<String>(regionId);
+    if (!nullToAbsent || regionName != null) {
+      map['region_name'] = Variable<String>(regionName);
+    }
+    if (!nullToAbsent || regionCity != null) {
+      map['region_city'] = Variable<String>(regionCity);
+    }
+    if (!nullToAbsent || regionProvince != null) {
+      map['region_province'] = Variable<String>(regionProvince);
+    }
+    map['end_date'] = Variable<DateTime>(endDate);
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
+    }
+    if (!nullToAbsent || contact != null) {
+      map['contact'] = Variable<String>(contact);
+    }
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
+    }
+    if (!nullToAbsent || localImageBytes != null) {
+      map['local_image_bytes'] = Variable<Uint8List>(localImageBytes);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['cached_at'] = Variable<DateTime>(cachedAt);
+    return map;
+  }
+
+  ArchivedOpportunitiesCompanion toCompanion(bool nullToAbsent) {
+    return ArchivedOpportunitiesCompanion(
+      opportunityId: Value(opportunityId),
+      userId: Value(userId),
+      opportunityOwnerId: Value(opportunityOwnerId),
+      title: Value(title),
+      description: Value(description),
+      category: Value(category),
+      regionId: Value(regionId),
+      regionName: regionName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(regionName),
+      regionCity: regionCity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(regionCity),
+      regionProvince: regionProvince == null && nullToAbsent
+          ? const Value.absent()
+          : Value(regionProvince),
+      endDate: Value(endDate),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
+      contact: contact == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contact),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageUrl),
+      localImageBytes: localImageBytes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localImageBytes),
+      status: Value(status),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      cachedAt: Value(cachedAt),
+    );
+  }
+
+  factory ArchivedOpportunity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArchivedOpportunity(
+      opportunityId: serializer.fromJson<String>(json['opportunityId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      opportunityOwnerId: serializer.fromJson<String>(
+        json['opportunityOwnerId'],
+      ),
+      title: serializer.fromJson<String>(json['title']),
+      description: serializer.fromJson<String>(json['description']),
+      category: serializer.fromJson<String>(json['category']),
+      regionId: serializer.fromJson<String>(json['regionId']),
+      regionName: serializer.fromJson<String?>(json['regionName']),
+      regionCity: serializer.fromJson<String?>(json['regionCity']),
+      regionProvince: serializer.fromJson<String?>(json['regionProvince']),
+      endDate: serializer.fromJson<DateTime>(json['endDate']),
+      source: serializer.fromJson<String?>(json['source']),
+      contact: serializer.fromJson<String?>(json['contact']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
+      localImageBytes: serializer.fromJson<Uint8List?>(json['localImageBytes']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      cachedAt: serializer.fromJson<DateTime>(json['cachedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'opportunityId': serializer.toJson<String>(opportunityId),
+      'userId': serializer.toJson<String>(userId),
+      'opportunityOwnerId': serializer.toJson<String>(opportunityOwnerId),
+      'title': serializer.toJson<String>(title),
+      'description': serializer.toJson<String>(description),
+      'category': serializer.toJson<String>(category),
+      'regionId': serializer.toJson<String>(regionId),
+      'regionName': serializer.toJson<String?>(regionName),
+      'regionCity': serializer.toJson<String?>(regionCity),
+      'regionProvince': serializer.toJson<String?>(regionProvince),
+      'endDate': serializer.toJson<DateTime>(endDate),
+      'source': serializer.toJson<String?>(source),
+      'contact': serializer.toJson<String?>(contact),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
+      'localImageBytes': serializer.toJson<Uint8List?>(localImageBytes),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'cachedAt': serializer.toJson<DateTime>(cachedAt),
+    };
+  }
+
+  ArchivedOpportunity copyWith({
+    String? opportunityId,
+    String? userId,
+    String? opportunityOwnerId,
+    String? title,
+    String? description,
+    String? category,
+    String? regionId,
+    Value<String?> regionName = const Value.absent(),
+    Value<String?> regionCity = const Value.absent(),
+    Value<String?> regionProvince = const Value.absent(),
+    DateTime? endDate,
+    Value<String?> source = const Value.absent(),
+    Value<String?> contact = const Value.absent(),
+    Value<String?> imageUrl = const Value.absent(),
+    Value<Uint8List?> localImageBytes = const Value.absent(),
+    String? status,
+    Value<DateTime?> createdAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    DateTime? cachedAt,
+  }) => ArchivedOpportunity(
+    opportunityId: opportunityId ?? this.opportunityId,
+    userId: userId ?? this.userId,
+    opportunityOwnerId: opportunityOwnerId ?? this.opportunityOwnerId,
+    title: title ?? this.title,
+    description: description ?? this.description,
+    category: category ?? this.category,
+    regionId: regionId ?? this.regionId,
+    regionName: regionName.present ? regionName.value : this.regionName,
+    regionCity: regionCity.present ? regionCity.value : this.regionCity,
+    regionProvince: regionProvince.present
+        ? regionProvince.value
+        : this.regionProvince,
+    endDate: endDate ?? this.endDate,
+    source: source.present ? source.value : this.source,
+    contact: contact.present ? contact.value : this.contact,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
+    localImageBytes: localImageBytes.present
+        ? localImageBytes.value
+        : this.localImageBytes,
+    status: status ?? this.status,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    cachedAt: cachedAt ?? this.cachedAt,
+  );
+  ArchivedOpportunity copyWithCompanion(ArchivedOpportunitiesCompanion data) {
+    return ArchivedOpportunity(
+      opportunityId: data.opportunityId.present
+          ? data.opportunityId.value
+          : this.opportunityId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      opportunityOwnerId: data.opportunityOwnerId.present
+          ? data.opportunityOwnerId.value
+          : this.opportunityOwnerId,
+      title: data.title.present ? data.title.value : this.title,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      category: data.category.present ? data.category.value : this.category,
+      regionId: data.regionId.present ? data.regionId.value : this.regionId,
+      regionName: data.regionName.present
+          ? data.regionName.value
+          : this.regionName,
+      regionCity: data.regionCity.present
+          ? data.regionCity.value
+          : this.regionCity,
+      regionProvince: data.regionProvince.present
+          ? data.regionProvince.value
+          : this.regionProvince,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      source: data.source.present ? data.source.value : this.source,
+      contact: data.contact.present ? data.contact.value : this.contact,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      localImageBytes: data.localImageBytes.present
+          ? data.localImageBytes.value
+          : this.localImageBytes,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      cachedAt: data.cachedAt.present ? data.cachedAt.value : this.cachedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArchivedOpportunity(')
+          ..write('opportunityId: $opportunityId, ')
+          ..write('userId: $userId, ')
+          ..write('opportunityOwnerId: $opportunityOwnerId, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('category: $category, ')
+          ..write('regionId: $regionId, ')
+          ..write('regionName: $regionName, ')
+          ..write('regionCity: $regionCity, ')
+          ..write('regionProvince: $regionProvince, ')
+          ..write('endDate: $endDate, ')
+          ..write('source: $source, ')
+          ..write('contact: $contact, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localImageBytes: $localImageBytes, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('cachedAt: $cachedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    opportunityId,
+    userId,
+    opportunityOwnerId,
+    title,
+    description,
+    category,
+    regionId,
+    regionName,
+    regionCity,
+    regionProvince,
+    endDate,
+    source,
+    contact,
+    imageUrl,
+    $driftBlobEquality.hash(localImageBytes),
+    status,
+    createdAt,
+    deletedAt,
+    cachedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArchivedOpportunity &&
+          other.opportunityId == this.opportunityId &&
+          other.userId == this.userId &&
+          other.opportunityOwnerId == this.opportunityOwnerId &&
+          other.title == this.title &&
+          other.description == this.description &&
+          other.category == this.category &&
+          other.regionId == this.regionId &&
+          other.regionName == this.regionName &&
+          other.regionCity == this.regionCity &&
+          other.regionProvince == this.regionProvince &&
+          other.endDate == this.endDate &&
+          other.source == this.source &&
+          other.contact == this.contact &&
+          other.imageUrl == this.imageUrl &&
+          $driftBlobEquality.equals(
+            other.localImageBytes,
+            this.localImageBytes,
+          ) &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.deletedAt == this.deletedAt &&
+          other.cachedAt == this.cachedAt);
+}
+
+class ArchivedOpportunitiesCompanion
+    extends UpdateCompanion<ArchivedOpportunity> {
+  final Value<String> opportunityId;
+  final Value<String> userId;
+  final Value<String> opportunityOwnerId;
+  final Value<String> title;
+  final Value<String> description;
+  final Value<String> category;
+  final Value<String> regionId;
+  final Value<String?> regionName;
+  final Value<String?> regionCity;
+  final Value<String?> regionProvince;
+  final Value<DateTime> endDate;
+  final Value<String?> source;
+  final Value<String?> contact;
+  final Value<String?> imageUrl;
+  final Value<Uint8List?> localImageBytes;
+  final Value<String> status;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> deletedAt;
+  final Value<DateTime> cachedAt;
+  final Value<int> rowid;
+  const ArchivedOpportunitiesCompanion({
+    this.opportunityId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.opportunityOwnerId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.description = const Value.absent(),
+    this.category = const Value.absent(),
+    this.regionId = const Value.absent(),
+    this.regionName = const Value.absent(),
+    this.regionCity = const Value.absent(),
+    this.regionProvince = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.source = const Value.absent(),
+    this.contact = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.localImageBytes = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.cachedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArchivedOpportunitiesCompanion.insert({
+    required String opportunityId,
+    required String userId,
+    this.opportunityOwnerId = const Value.absent(),
+    required String title,
+    required String description,
+    required String category,
+    required String regionId,
+    this.regionName = const Value.absent(),
+    this.regionCity = const Value.absent(),
+    this.regionProvince = const Value.absent(),
+    required DateTime endDate,
+    this.source = const Value.absent(),
+    this.contact = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.localImageBytes = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required DateTime cachedAt,
+    this.rowid = const Value.absent(),
+  }) : opportunityId = Value(opportunityId),
+       userId = Value(userId),
+       title = Value(title),
+       description = Value(description),
+       category = Value(category),
+       regionId = Value(regionId),
+       endDate = Value(endDate),
+       cachedAt = Value(cachedAt);
+  static Insertable<ArchivedOpportunity> custom({
+    Expression<String>? opportunityId,
+    Expression<String>? userId,
+    Expression<String>? opportunityOwnerId,
+    Expression<String>? title,
+    Expression<String>? description,
+    Expression<String>? category,
+    Expression<String>? regionId,
+    Expression<String>? regionName,
+    Expression<String>? regionCity,
+    Expression<String>? regionProvince,
+    Expression<DateTime>? endDate,
+    Expression<String>? source,
+    Expression<String>? contact,
+    Expression<String>? imageUrl,
+    Expression<Uint8List>? localImageBytes,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? deletedAt,
+    Expression<DateTime>? cachedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (opportunityId != null) 'opportunity_id': opportunityId,
+      if (userId != null) 'user_id': userId,
+      if (opportunityOwnerId != null)
+        'opportunity_owner_id': opportunityOwnerId,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
+      if (category != null) 'category': category,
+      if (regionId != null) 'region_id': regionId,
+      if (regionName != null) 'region_name': regionName,
+      if (regionCity != null) 'region_city': regionCity,
+      if (regionProvince != null) 'region_province': regionProvince,
+      if (endDate != null) 'end_date': endDate,
+      if (source != null) 'source': source,
+      if (contact != null) 'contact': contact,
+      if (imageUrl != null) 'image_url': imageUrl,
+      if (localImageBytes != null) 'local_image_bytes': localImageBytes,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (cachedAt != null) 'cached_at': cachedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArchivedOpportunitiesCompanion copyWith({
+    Value<String>? opportunityId,
+    Value<String>? userId,
+    Value<String>? opportunityOwnerId,
+    Value<String>? title,
+    Value<String>? description,
+    Value<String>? category,
+    Value<String>? regionId,
+    Value<String?>? regionName,
+    Value<String?>? regionCity,
+    Value<String?>? regionProvince,
+    Value<DateTime>? endDate,
+    Value<String?>? source,
+    Value<String?>? contact,
+    Value<String?>? imageUrl,
+    Value<Uint8List?>? localImageBytes,
+    Value<String>? status,
+    Value<DateTime?>? createdAt,
+    Value<DateTime?>? deletedAt,
+    Value<DateTime>? cachedAt,
+    Value<int>? rowid,
+  }) {
+    return ArchivedOpportunitiesCompanion(
+      opportunityId: opportunityId ?? this.opportunityId,
+      userId: userId ?? this.userId,
+      opportunityOwnerId: opportunityOwnerId ?? this.opportunityOwnerId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      regionId: regionId ?? this.regionId,
+      regionName: regionName ?? this.regionName,
+      regionCity: regionCity ?? this.regionCity,
+      regionProvince: regionProvince ?? this.regionProvince,
+      endDate: endDate ?? this.endDate,
+      source: source ?? this.source,
+      contact: contact ?? this.contact,
+      imageUrl: imageUrl ?? this.imageUrl,
+      localImageBytes: localImageBytes ?? this.localImageBytes,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      cachedAt: cachedAt ?? this.cachedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (opportunityId.present) {
+      map['opportunity_id'] = Variable<String>(opportunityId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (opportunityOwnerId.present) {
+      map['opportunity_owner_id'] = Variable<String>(opportunityOwnerId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (regionId.present) {
+      map['region_id'] = Variable<String>(regionId.value);
+    }
+    if (regionName.present) {
+      map['region_name'] = Variable<String>(regionName.value);
+    }
+    if (regionCity.present) {
+      map['region_city'] = Variable<String>(regionCity.value);
+    }
+    if (regionProvince.present) {
+      map['region_province'] = Variable<String>(regionProvince.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (contact.present) {
+      map['contact'] = Variable<String>(contact.value);
+    }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
+    if (localImageBytes.present) {
+      map['local_image_bytes'] = Variable<Uint8List>(localImageBytes.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (cachedAt.present) {
+      map['cached_at'] = Variable<DateTime>(cachedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArchivedOpportunitiesCompanion(')
+          ..write('opportunityId: $opportunityId, ')
+          ..write('userId: $userId, ')
+          ..write('opportunityOwnerId: $opportunityOwnerId, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('category: $category, ')
+          ..write('regionId: $regionId, ')
+          ..write('regionName: $regionName, ')
+          ..write('regionCity: $regionCity, ')
+          ..write('regionProvince: $regionProvince, ')
+          ..write('endDate: $endDate, ')
+          ..write('source: $source, ')
+          ..write('contact: $contact, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('localImageBytes: $localImageBytes, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('cachedAt: $cachedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2019,6 +3103,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $RegionsTable regions = $RegionsTable(this);
   late final $SavedOpportunitiesTable savedOpportunities =
       $SavedOpportunitiesTable(this);
+  late final $ArchivedOpportunitiesTable archivedOpportunities =
+      $ArchivedOpportunitiesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2027,6 +3113,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userProfiles,
     regions,
     savedOpportunities,
+    archivedOpportunities,
   ];
 }
 
@@ -3024,6 +4111,516 @@ typedef $$SavedOpportunitiesTableProcessedTableManager =
       SavedOpportunity,
       PrefetchHooks Function()
     >;
+typedef $$ArchivedOpportunitiesTableCreateCompanionBuilder =
+    ArchivedOpportunitiesCompanion Function({
+      required String opportunityId,
+      required String userId,
+      Value<String> opportunityOwnerId,
+      required String title,
+      required String description,
+      required String category,
+      required String regionId,
+      Value<String?> regionName,
+      Value<String?> regionCity,
+      Value<String?> regionProvince,
+      required DateTime endDate,
+      Value<String?> source,
+      Value<String?> contact,
+      Value<String?> imageUrl,
+      Value<Uint8List?> localImageBytes,
+      Value<String> status,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> deletedAt,
+      required DateTime cachedAt,
+      Value<int> rowid,
+    });
+typedef $$ArchivedOpportunitiesTableUpdateCompanionBuilder =
+    ArchivedOpportunitiesCompanion Function({
+      Value<String> opportunityId,
+      Value<String> userId,
+      Value<String> opportunityOwnerId,
+      Value<String> title,
+      Value<String> description,
+      Value<String> category,
+      Value<String> regionId,
+      Value<String?> regionName,
+      Value<String?> regionCity,
+      Value<String?> regionProvince,
+      Value<DateTime> endDate,
+      Value<String?> source,
+      Value<String?> contact,
+      Value<String?> imageUrl,
+      Value<Uint8List?> localImageBytes,
+      Value<String> status,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> deletedAt,
+      Value<DateTime> cachedAt,
+      Value<int> rowid,
+    });
+
+class $$ArchivedOpportunitiesTableFilterComposer
+    extends Composer<_$AppDatabase, $ArchivedOpportunitiesTable> {
+  $$ArchivedOpportunitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get opportunityId => $composableBuilder(
+    column: $table.opportunityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get opportunityOwnerId => $composableBuilder(
+    column: $table.opportunityOwnerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get regionId => $composableBuilder(
+    column: $table.regionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get regionName => $composableBuilder(
+    column: $table.regionName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get regionCity => $composableBuilder(
+    column: $table.regionCity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get regionProvince => $composableBuilder(
+    column: $table.regionProvince,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contact => $composableBuilder(
+    column: $table.contact,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get localImageBytes => $composableBuilder(
+    column: $table.localImageBytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get cachedAt => $composableBuilder(
+    column: $table.cachedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ArchivedOpportunitiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArchivedOpportunitiesTable> {
+  $$ArchivedOpportunitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get opportunityId => $composableBuilder(
+    column: $table.opportunityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get opportunityOwnerId => $composableBuilder(
+    column: $table.opportunityOwnerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get regionId => $composableBuilder(
+    column: $table.regionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get regionName => $composableBuilder(
+    column: $table.regionName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get regionCity => $composableBuilder(
+    column: $table.regionCity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get regionProvince => $composableBuilder(
+    column: $table.regionProvince,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contact => $composableBuilder(
+    column: $table.contact,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get localImageBytes => $composableBuilder(
+    column: $table.localImageBytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get cachedAt => $composableBuilder(
+    column: $table.cachedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArchivedOpportunitiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArchivedOpportunitiesTable> {
+  $$ArchivedOpportunitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get opportunityId => $composableBuilder(
+    column: $table.opportunityId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get opportunityOwnerId => $composableBuilder(
+    column: $table.opportunityOwnerId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get regionId =>
+      $composableBuilder(column: $table.regionId, builder: (column) => column);
+
+  GeneratedColumn<String> get regionName => $composableBuilder(
+    column: $table.regionName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get regionCity => $composableBuilder(
+    column: $table.regionCity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get regionProvince => $composableBuilder(
+    column: $table.regionProvince,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get contact =>
+      $composableBuilder(column: $table.contact, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get localImageBytes => $composableBuilder(
+    column: $table.localImageBytes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get cachedAt =>
+      $composableBuilder(column: $table.cachedAt, builder: (column) => column);
+}
+
+class $$ArchivedOpportunitiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArchivedOpportunitiesTable,
+          ArchivedOpportunity,
+          $$ArchivedOpportunitiesTableFilterComposer,
+          $$ArchivedOpportunitiesTableOrderingComposer,
+          $$ArchivedOpportunitiesTableAnnotationComposer,
+          $$ArchivedOpportunitiesTableCreateCompanionBuilder,
+          $$ArchivedOpportunitiesTableUpdateCompanionBuilder,
+          (
+            ArchivedOpportunity,
+            BaseReferences<
+              _$AppDatabase,
+              $ArchivedOpportunitiesTable,
+              ArchivedOpportunity
+            >,
+          ),
+          ArchivedOpportunity,
+          PrefetchHooks Function()
+        > {
+  $$ArchivedOpportunitiesTableTableManager(
+    _$AppDatabase db,
+    $ArchivedOpportunitiesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArchivedOpportunitiesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ArchivedOpportunitiesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ArchivedOpportunitiesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> opportunityId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String> opportunityOwnerId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> regionId = const Value.absent(),
+                Value<String?> regionName = const Value.absent(),
+                Value<String?> regionCity = const Value.absent(),
+                Value<String?> regionProvince = const Value.absent(),
+                Value<DateTime> endDate = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<String?> contact = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<Uint8List?> localImageBytes = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<DateTime> cachedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArchivedOpportunitiesCompanion(
+                opportunityId: opportunityId,
+                userId: userId,
+                opportunityOwnerId: opportunityOwnerId,
+                title: title,
+                description: description,
+                category: category,
+                regionId: regionId,
+                regionName: regionName,
+                regionCity: regionCity,
+                regionProvince: regionProvince,
+                endDate: endDate,
+                source: source,
+                contact: contact,
+                imageUrl: imageUrl,
+                localImageBytes: localImageBytes,
+                status: status,
+                createdAt: createdAt,
+                deletedAt: deletedAt,
+                cachedAt: cachedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String opportunityId,
+                required String userId,
+                Value<String> opportunityOwnerId = const Value.absent(),
+                required String title,
+                required String description,
+                required String category,
+                required String regionId,
+                Value<String?> regionName = const Value.absent(),
+                Value<String?> regionCity = const Value.absent(),
+                Value<String?> regionProvince = const Value.absent(),
+                required DateTime endDate,
+                Value<String?> source = const Value.absent(),
+                Value<String?> contact = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+                Value<Uint8List?> localImageBytes = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required DateTime cachedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ArchivedOpportunitiesCompanion.insert(
+                opportunityId: opportunityId,
+                userId: userId,
+                opportunityOwnerId: opportunityOwnerId,
+                title: title,
+                description: description,
+                category: category,
+                regionId: regionId,
+                regionName: regionName,
+                regionCity: regionCity,
+                regionProvince: regionProvince,
+                endDate: endDate,
+                source: source,
+                contact: contact,
+                imageUrl: imageUrl,
+                localImageBytes: localImageBytes,
+                status: status,
+                createdAt: createdAt,
+                deletedAt: deletedAt,
+                cachedAt: cachedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ArchivedOpportunitiesTable, ArchivedOpportunity>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ArchivedOpportunitiesTable,
+                    ArchivedOpportunity
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArchivedOpportunitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArchivedOpportunitiesTable,
+      ArchivedOpportunity,
+      $$ArchivedOpportunitiesTableFilterComposer,
+      $$ArchivedOpportunitiesTableOrderingComposer,
+      $$ArchivedOpportunitiesTableAnnotationComposer,
+      $$ArchivedOpportunitiesTableCreateCompanionBuilder,
+      $$ArchivedOpportunitiesTableUpdateCompanionBuilder,
+      (
+        ArchivedOpportunity,
+        BaseReferences<
+          _$AppDatabase,
+          $ArchivedOpportunitiesTable,
+          ArchivedOpportunity
+        >,
+      ),
+      ArchivedOpportunity,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3034,4 +4631,6 @@ class $AppDatabaseManager {
       $$RegionsTableTableManager(_db, _db.regions);
   $$SavedOpportunitiesTableTableManager get savedOpportunities =>
       $$SavedOpportunitiesTableTableManager(_db, _db.savedOpportunities);
+  $$ArchivedOpportunitiesTableTableManager get archivedOpportunities =>
+      $$ArchivedOpportunitiesTableTableManager(_db, _db.archivedOpportunities);
 }

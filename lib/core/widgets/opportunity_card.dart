@@ -12,6 +12,9 @@ class OpportunityCard extends StatefulWidget {
   final bool isSaved;
   final VoidCallback? onTap;
   final VoidCallback? onBookmarkTap;
+  final bool showBookmark;
+  final bool isArchived;
+  final bool isHistory;
 
   const OpportunityCard({
     super.key,
@@ -21,6 +24,9 @@ class OpportunityCard extends StatefulWidget {
     this.isSaved = false,
     this.onTap,
     this.onBookmarkTap,
+    this.showBookmark = true,
+    this.isArchived = false,
+    this.isHistory = false,
   });
 
   @override
@@ -90,6 +96,12 @@ class _OpportunityCardState extends State<OpportunityCard> {
     return 'Segera berakhir';
   }
 
+  String _formatEndDate(DateTime endDate) {
+    return '${endDate.day.toString().padLeft(2, '0')}/'
+        '${endDate.month.toString().padLeft(2, '0')}/'
+        '${endDate.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoryColor = _getCategoryColor(opportunity.category);
@@ -135,7 +147,41 @@ class _OpportunityCardState extends State<OpportunityCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  VerificationBadge(category: opportunity.category),
+                  Row(
+                    children: [
+                      VerificationBadge(category: opportunity.category),
+
+                      if (widget.isHistory) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: opportunity.status == 'active'
+                                ? AppColors.primary.withValues(alpha: 0.10)
+                                : AppColors.secondaryText.withValues(
+                                    alpha: 0.10,
+                                  ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            opportunity.status == 'active'
+                                ? 'Aktif'
+                                : 'Diarsipkan',
+                            style: AppTextStyles.secondary.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: opportunity.status == 'active'
+                                  ? AppColors.primary
+                                  : AppColors.secondaryText,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
 
                   const SizedBox(height: 5),
 
@@ -181,7 +227,9 @@ class _OpportunityCardState extends State<OpportunityCard> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _getTimeRemaining(opportunity.endDate),
+                        (widget.isHistory || widget.isArchived)
+                            ? 'Berakhir ${_formatEndDate(opportunity.endDate)}'
+                            : _getTimeRemaining(opportunity.endDate),
                         style: AppTextStyles.secondary.copyWith(fontSize: 12),
                       ),
                       if (opportunity.source != null &&
@@ -213,36 +261,41 @@ class _OpportunityCardState extends State<OpportunityCard> {
             const SizedBox(width: 5),
 
             // BOOKMARK
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: widget.isSaved ? AppColors.primary : AppColors.border,
-                ),
-                borderRadius: BorderRadius.circular(10),
-                color: widget.isSaved
-                    ? AppColors.primary.withValues(alpha: 0.08)
-                    : AppColors.white,
-              ),
-              child: IconButton(
-                onPressed: widget.onBookmarkTap,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints.tightFor(
-                  width: 32,
-                  height: 32,
-                ),
-                icon: Icon(
-                  widget.isSaved
-                      ? Icons.bookmark_rounded
-                      : Icons.bookmark_border_rounded,
+            if (widget.showBookmark) ...[
+              const SizedBox(width: 5),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: widget.isSaved
+                        ? AppColors.primary
+                        : AppColors.border,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
                   color: widget.isSaved
-                      ? AppColors.primary
-                      : AppColors.secondaryText,
-                  size: 24,
+                      ? AppColors.primary.withValues(alpha: 0.08)
+                      : AppColors.white,
+                ),
+                child: IconButton(
+                  onPressed: widget.onBookmarkTap,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 32,
+                  ),
+                  icon: Icon(
+                    widget.isSaved
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    color: widget.isSaved
+                        ? AppColors.primary
+                        : AppColors.secondaryText,
+                    size: 24,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),

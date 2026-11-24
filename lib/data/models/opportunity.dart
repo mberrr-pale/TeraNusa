@@ -14,6 +14,7 @@ class Opportunity {
   final Uint8List? localImageBytes;
   final String status;
   final DateTime? createdAt;
+  final DateTime? deletedAt;
   final String? regionName;
   final String? regionCity;
   final String? regionProvince;
@@ -32,6 +33,7 @@ class Opportunity {
     this.localImageBytes,
     this.status = 'active',
     this.createdAt,
+    this.deletedAt,
     this.regionName,
     this.regionCity,
     this.regionProvince,
@@ -66,6 +68,9 @@ class Opportunity {
       createdAt: map['created_at'] != null
           ? DateTime.tryParse(map['created_at'].toString())
           : null,
+      deletedAt: map['deleted_at'] != null
+          ? DateTime.tryParse(map['deleted_at'].toString())
+          : null,
       regionName: regionName.isEmpty ? null : regionName,
       regionCity: city.isEmpty ? null : city,
       regionProvince: province.isEmpty ? null : province,
@@ -86,6 +91,7 @@ class Opportunity {
       'image_url': imageUrl,
       'status': status,
       'created_at': createdAt?.toIso8601String(),
+      'deleted_at': deletedAt?.toIso8601String(),
     };
   }
 }

@@ -5,18 +5,21 @@ import 'profile_menu_item.dart';
 
 class ProfileMenu extends StatelessWidget {
   final bool isOnline;
-
+  final bool isContributor;
   final VoidCallback onEditProfile;
   final VoidCallback onChangePassword;
   final VoidCallback onSaved;
+  final VoidCallback onArchived;
   final VoidCallback onOffline;
 
   const ProfileMenu({
     super.key,
     required this.isOnline,
+    required this.isContributor,
     required this.onEditProfile,
     required this.onChangePassword,
     required this.onSaved,
+    required this.onArchived,
     required this.onOffline,
   });
 
@@ -72,9 +75,18 @@ class ProfileMenu extends StatelessWidget {
                 icon: Icons.bookmark_added_rounded,
                 title: 'Tersimpan',
                 subtitle: 'Lihat Peluang yang kamu simpan',
-                isLast: true,
+                isLast: !isContributor,
                 onTap: onSaved,
               ),
+
+              if (isContributor)
+                ProfileMenuItem(
+                  icon: Icons.archive_outlined,
+                  title: 'Arsip Peluang',
+                  subtitle: 'Lihat peluang yang telah diposting',
+                  isLast: true,
+                  onTap: onArchived,
+                ),
             ],
           ),
         ),

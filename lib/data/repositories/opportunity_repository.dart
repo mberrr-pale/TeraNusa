@@ -38,6 +38,25 @@ class OpportunityRepository {
         .toList();
   }
 
+  Future<List<Opportunity>> getArchivedOpportunities() async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null) {
+      return [];
+    }
+
+    final response = await _supabase
+        .from('opportunities')
+        .select('*, regions(province, city)')
+        .eq('user_id', userId)
+        .inFilter('status', ['active', 'archived'])
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((item) => Opportunity.fromMap(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+
   Future<List<Opportunity>> searchOpportunities(
     String query, {
     String? category,

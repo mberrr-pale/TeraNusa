@@ -5,14 +5,27 @@ import '../models/opportunity.dart';
 class SavedOpportunityRepository {
   final SupabaseClient _supabase;
 
+  String get _today {
+    final now = DateTime.now();
+    return '${now.year.toString().padLeft(4, '0')}-'
+        '${now.month.toString().padLeft(2, '0')}-'
+        '${now.day.toString().padLeft(2, '0')}';
+  }
+
   SavedOpportunityRepository(this._supabase);
 
   // Mengambil ID seluruh peluang yang disimpan pengguna.
   Future<Set<String>> getSavedOpportunityIds(String userId) async {
     final response = await _supabase
         .from('saved_opportunities')
-        .select('opportunity_id')
-        .eq('user_id', userId);
+        .select(
+          'opportunity_id, '
+          'opportunities!saved_opportunities_opportunity_id_fkey!inner('
+          'status, end_date)',
+        )
+        .eq('user_id', userId)
+        .eq('opportunities.status', 'active')
+        .gte('opportunities.end_date', _today);
 
     return response.map((item) => item['opportunity_id'].toString()).toSet();
   }
@@ -22,16 +35,18 @@ class SavedOpportunityRepository {
     final response = await _supabase
         .from('saved_opportunities')
         .select('''
-          opportunity_id,
-          opportunities!saved_opportunities_opportunity_id_fkey(
-            *,
-            regions(province, city)
-          )
-        ''')
+        opportunity_id,
+        opportunities!saved_opportunities_opportunity_id_fkey!inner(
+          *,
+          regions(province, city)
+        )
+      ''')
         .eq('user_id', userId)
+        .eq('opportunities.status', 'active')
+        .gte('opportunities.end_date', _today)
         .order('saved_at', ascending: false);
 
-    return response.where((item) => item['opportunities'] != null).map((item) {
+    return response.map((item) {
       final opportunityData = Map<String, dynamic>.from(
         item['opportunities'] as Map,
       );

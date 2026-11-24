@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,8 +24,13 @@ import '../../data/models/opportunity.dart';
 
 class OpportunityDetailPage extends ConsumerStatefulWidget {
   final Opportunity opportunity;
+  final bool isArchived;
 
-  const OpportunityDetailPage({super.key, required this.opportunity});
+  const OpportunityDetailPage({
+    super.key,
+    required this.opportunity,
+    this.isArchived = false,
+  });
 
   @override
   ConsumerState<OpportunityDetailPage> createState() =>
@@ -407,6 +413,101 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
     );
   }
 
+  Widget _buildArchivedSourceInfo() {
+    final source = opportunity.source?.trim();
+    final contact = opportunity.contact?.trim();
+
+    return AppCard(
+      padding: const EdgeInsets.all(20),
+      backgroundColor: AppColors.white,
+      borderRadius: 13,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.verified_rounded,
+                color: AppColors.primary,
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  source?.isNotEmpty == true
+                      ? source!
+                      : 'Sumber belum tersedia',
+                  style: AppTextStyles.body.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (contact?.isNotEmpty == true) ...[
+            const SizedBox(height: 12),
+            const Divider(color: AppColors.border),
+            const SizedBox(height: 8),
+
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Informasi Kontak',
+                        style: AppTextStyles.secondary.copyWith(fontSize: 14),
+                      ),
+                      const SizedBox(height: 6),
+                      SelectableText(
+                        contact!,
+                        style: AppTextStyles.body.copyWith(
+                          fontSize: 16,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => _copyContact(contact),
+                  icon: const Icon(
+                    Icons.copy_rounded,
+                    size: 22,
+                    color: AppColors.primary,
+                  ),
+                  tooltip: 'Salin kontak',
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _copyContact(String contact) async {
+    await Clipboard.setData(ClipboardData(text: contact));
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Informasi kontak berhasil disalin.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   Widget _buildSecurityWarning() {
     return Container(
       width: double.infinity,
@@ -606,6 +707,8 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
         opportunity.opportunityId != null &&
         savedIds.contains(opportunity.opportunityId);
 
+    final isArchived = widget.isArchived;
+
     final categoryColor = AppColors.categoryColor(opportunity.category);
 
     final categoryBackground = AppColors.categoryBackground(
@@ -632,12 +735,14 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
                     ),
 
                     // Header berada di atas gambar.
-                    const Positioned(
+                    Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
                       child: AppHeader.backTitle(
-                        title: 'Detail Peluang',
+                        title: isArchived
+                            ? 'Detail Arsip Peluang'
+                            : 'Detail Peluang',
                         overlay: false,
                       ),
                     ),
@@ -698,7 +803,9 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
                           Expanded(
                             child: _buildInfoCard(
                               icon: Icons.calendar_month_rounded,
-                              label: 'Berlaku hingga',
+                              label: isArchived
+                                  ? 'Berakhir pada'
+                                  : 'Berlaku hingga',
                               value: _formatDate(opportunity.endDate),
                             ),
                           ),
@@ -732,7 +839,9 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
 
                       const SizedBox(height: 10),
 
-                      _buildSourceInfo(),
+                      isArchived
+                          ? _buildArchivedSourceInfo()
+                          : _buildSourceInfo(),
 
                       const SizedBox(height: 18),
 
@@ -742,7 +851,8 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
                       const SizedBox(height: 18),
 
                       // Button Action.
-                      _buildActionButtons(context, ref, isGuest, isSaved),
+                      if (!isArchived)
+                        _buildActionButtons(context, ref, isGuest, isSaved),
                     ],
                   ),
                 ),
@@ -751,23 +861,25 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: AppButton(
-            label: 'Hubungi sumber',
-            icon: Icons.chat_rounded,
-            trailingIcon: Icons.arrow_forward_ios_rounded,
-            onPressed: () => _showContactConfirmation(context),
-            height: 50,
-          ),
-        ),
-      ),
+      bottomNavigationBar: isArchived
+          ? null
+          : SafeArea(
+              top: false,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  border: Border(top: BorderSide(color: AppColors.border)),
+                ),
+                child: AppButton(
+                  label: 'Hubungi sumber',
+                  icon: Icons.chat_rounded,
+                  trailingIcon: Icons.arrow_forward_ios_rounded,
+                  onPressed: () => _showContactConfirmation(context),
+                  height: 50,
+                ),
+              ),
+            ),
     );
   }
 }

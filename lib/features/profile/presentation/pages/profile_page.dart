@@ -101,9 +101,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     // PROFILE MENU
                     ProfileMenu(
                       isOnline: isOnline,
+                      isContributor: user.isContributor,
                       onEditProfile: _showEditProfile,
                       onChangePassword: _showChangePassword,
                       onSaved: _openSavedPage,
+                      onArchived: _openArchivedPage,
                       onOffline: _showOfflineInfo,
                     ),
 
@@ -345,6 +347,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   void _openSavedPage() {
     context.pushNamed('saved');
+  }
+
+  // ================= ARCHIVE PAGE =================
+
+  void _openArchivedPage() {
+    context.pushNamed('archived');
   }
 
   // ================= OFFLINE INFO =================

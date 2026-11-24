@@ -10,8 +10,16 @@ class LocalSavedOpportunityRepository {
 
   // Mengambil ID seluruh peluang yang tersimpan secara lokal.
   Future<Set<String>> getSavedOpportunityIds(String userId) async {
+    final today = DateTime.now();
+    final startOfToday = DateTime(today.year, today.month, today.day);
+
     final query = _database.select(_database.savedOpportunities)
-      ..where((table) => table.userId.equals(userId));
+      ..where(
+        (table) =>
+            table.userId.equals(userId) &
+            table.status.equals('active') &
+            table.endDate.isBiggerOrEqualValue(startOfToday),
+      );
 
     final results = await query.get();
 
@@ -20,8 +28,16 @@ class LocalSavedOpportunityRepository {
 
   // Mengambil detail peluang yang tersimpan secara lokal.
   Future<List<Opportunity>> getSavedOpportunities(String userId) async {
+    final today = DateTime.now();
+    final startOfToday = DateTime(today.year, today.month, today.day);
+
     final query = _database.select(_database.savedOpportunities)
-      ..where((table) => table.userId.equals(userId))
+      ..where(
+        (table) =>
+            table.userId.equals(userId) &
+            table.status.equals('active') &
+            table.endDate.isBiggerOrEqualValue(startOfToday),
+      )
       ..orderBy([(table) => OrderingTerm.desc(table.cachedAt)]);
 
     final results = await query.get();

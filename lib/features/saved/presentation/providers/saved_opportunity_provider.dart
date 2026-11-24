@@ -202,6 +202,21 @@ class SavedOpportunityNotifier extends AsyncNotifier<Set<String>> {
   }
 
   // ==========================================================
+  // REFRESH
+  // ==========================================================
+
+  Future<void> refresh() async {
+    final user = await ref.read(authProvider.future);
+
+    if (user == null) return;
+
+    // Sinkronkan data terbaru jika sedang online.
+    if (ref.read(internetStatusProvider).asData?.value == true) {
+      await _syncSavedOpportunities(user.userId);
+    }
+  }
+
+  // ==========================================================
   // SAVE / UNSAVE
   // ==========================================================
 

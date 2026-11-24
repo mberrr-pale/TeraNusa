@@ -18,6 +18,7 @@ import '../../data/models/opportunity.dart';
 import '../../data/models/news.dart';
 import '../../features/news/news_detail_page.dart';
 import '../../features/saved/presentation/pages/saved_page.dart';
+import '../../features/contributor/presentation/pages/archived_page.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -57,6 +58,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final isAuthenticated = authState.asData?.value != null;
+      final user = authState.asData?.value;
+      final isContributor = user?.isContributor ?? false;
 
       final currentLocation = state.matchedLocation;
 
@@ -84,6 +87,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.home;
       }
 
+      // Arsip hanya bisa diakses oleh contributor.
+      final isArchivedRoute =
+          currentLocation == AppRoutes.archived ||
+          currentLocation == AppRoutes.archivedOpportunityDetail;
+
+      if (isArchivedRoute && !isContributor) {
+        return AppRoutes.home;
+      }
+      
       return null;
     },
 
@@ -160,6 +172,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.saved,
         name: 'saved',
         builder: (context, state) => const SavedPage(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.archived,
+        name: 'archived',
+        builder: (context, state) {
+          return const ArchivedPage();
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.archivedOpportunityDetail,
+        name: 'archivedOpportunityDetail',
+        builder: (context, state) {
+          final opportunity = state.extra as Opportunity;
+
+          return OpportunityDetailPage(
+            opportunity: opportunity,
+            isArchived: true,
+          );
+        },
       ),
     ],
 

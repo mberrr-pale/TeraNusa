@@ -4,15 +4,18 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'tables/user_profiles.dart';
 import 'tables/regions.dart';
 import 'tables/saved_opportunities.dart';
+import 'tables/archived_opportunities.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [UserProfiles, Regions, SavedOpportunities])
+@DriftDatabase(
+  tables: [UserProfiles, Regions, SavedOpportunities, ArchivedOpportunities],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -29,6 +32,9 @@ class AppDatabase extends _$AppDatabase {
           savedOpportunities,
           savedOpportunities.opportunityOwnerId as GeneratedColumn<Object>,
         );
+      }
+      if (from < 4) {
+        await migrator.createTable(archivedOpportunities);
       }
     },
   );
