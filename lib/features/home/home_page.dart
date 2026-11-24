@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/app_routes.dart';
+import '../../core/providers/internet_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/bookmark_action_helper.dart';
@@ -15,6 +16,7 @@ import '../../core/widgets/states/app_loading.dart';
 import '../../core/widgets/states/app_error.dart';
 import '../../core/widgets/states/app_empty.dart';
 import '../../core/widgets/guest_access_guard.dart';
+import '../../core/widgets/states/app_offline.dart';
 import '../../data/models/opportunity.dart';
 import '../../data/models/news.dart';
 import '../../data/repositories/opportunity_repository.dart';
@@ -48,6 +50,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _refreshFeed() async {
+    if (ref.read(internetStatusProvider).asData?.value != true) {
+      return;
+    }
+
     setState(() {
       _opportunitiesFuture = _repository.getFeedOpportunities();
       _newsFuture = _newsRepository.getFeedNews();
@@ -58,6 +64,14 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(internetStatusProvider, (previous, next) {
+      final wasOffline = previous?.asData?.value == false;
+      final isOnline = next.asData?.value == true;
+
+      if (wasOffline && isOnline && mounted) {
+        _refreshFeed();
+      }
+    });
     final authState = ref.watch(authProvider);
     final savedIdsState = ref.watch(savedOpportunityIdsProvider);
 
@@ -65,6 +79,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isGuest = !authState.isLoading && !authState.hasError && user == null;
 
     final savedIds = savedIdsState.asData?.value ?? <String>{};
+    final isOnline = ref.watch(internetStatusProvider).asData?.value;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -77,32 +92,48 @@ class _HomePageState extends ConsumerState<HomePage> {
               child: RefreshIndicator(
                 color: AppColors.primary,
                 onRefresh: _refreshFeed,
-                child: CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(14, 15, 14, 0),
-                      sliver: SliverList(
-                        delegate: SliverChildListDelegate([
-                          _buildRegionBanner(),
-                          if (isGuest) const SizedBox(height: 11),
-                          if (isGuest) _buildGuestCard(),
-                          const SizedBox(height: 22),
-                          _buildSectionHeader(),
-                          const SizedBox(height: 11),
-                        ]),
+                child: isOnline == false
+                    ? CustomScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: const [
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Padding(
+                              padding: EdgeInsets.all(12),
+                              child: AppOffline(),
+                            ),
+                          ),
+                        ],
+                      )
+                    : CustomScrollView(
+                        slivers: [
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(14, 15, 14, 0),
+                            sliver: SliverList(
+                              delegate: SliverChildListDelegate([
+                                _buildRegionBanner(),
+                                if (isGuest) const SizedBox(height: 11),
+                                if (isGuest) _buildGuestCard(),
+                                const SizedBox(height: 22),
+                                _buildSectionHeader(),
+                                const SizedBox(height: 11),
+                              ]),
+                            ),
+                          ),
+                          _buildOpportunityList(isGuest, savedIds),
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                20,
+                                14,
+                                20,
+                              ),
+                              child: _buildNewsSection(),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-
-                    _buildOpportunityList(isGuest, savedIds),
-
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 20, 14, 20),
-                        child: _buildNewsSection(),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],

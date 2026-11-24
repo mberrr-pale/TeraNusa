@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/presentation/providers/auth_provider.dart';
 import '../saved/presentation/providers/saved_opportunity_provider.dart';
 import '../../core/constants/app_routes.dart';
+import '../../core/providers/internet_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/bookmark_action_helper.dart';
@@ -18,6 +19,7 @@ import '../../core/widgets/states/app_empty.dart';
 import '../../core/widgets/app_bottom_sheet.dart';
 import '../../core/widgets/filter_summary_badge.dart';
 import '../../core/widgets/guest_access_guard.dart';
+import '../../core/widgets/states/app_offline.dart';
 import '../../data/repositories/opportunity_repository.dart';
 import '../../data/models/opportunity.dart';
 
@@ -93,13 +95,17 @@ class _OpportunityPageState extends ConsumerState<OpportunityPage> {
   }
 
   Future<void> _refreshOpportunities() async {
+    if (ref.read(internetStatusProvider).asData?.value != true) {
+      return;
+    }
+
     final future = _getFilteredOpportunities();
 
     setState(() {
       _opportunitiesFuture = future;
     });
 
-    await future;
+    await Future.wait([future, _loadCities()]);
   }
 
   Future<void> _showFilterSheet() async {
@@ -229,6 +235,14 @@ class _OpportunityPageState extends ConsumerState<OpportunityPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(internetStatusProvider, (previous, next) {
+      final wasOffline = previous?.asData?.value == false;
+      final isOnline = next.asData?.value == true;
+
+      if (wasOffline && isOnline && mounted) {
+        _refreshOpportunities();
+      }
+    });
     final authState = ref.watch(authProvider);
     final savedIdsState = ref.watch(savedOpportunityIdsProvider);
 
@@ -236,6 +250,9 @@ class _OpportunityPageState extends ConsumerState<OpportunityPage> {
     final isGuest = !authState.isLoading && !authState.hasError && user == null;
 
     final savedIds = savedIdsState.asData?.value ?? <String>{};
+
+    final isOnline = ref.watch(internetStatusProvider).asData?.value;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -244,198 +261,227 @@ class _OpportunityPageState extends ConsumerState<OpportunityPage> {
             const AppHeader(),
 
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(17, 18, 17, 12),
-                    child: Column(
+              child: isOnline == false
+                  ? RefreshIndicator(
+                      onRefresh: _refreshOpportunities,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: constraints.maxHeight,
+                                ),
+                                child: const AppOffline(),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    )
+                  : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Temukan Peluang', style: AppTextStyles.pageTitle),
-                        const SizedBox(height: 5),
-                        Text(
-                          'Jelajahi berbagai peluang di sekitarmu.',
-                          style: AppTextStyles.secondary,
-                        ),
-                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(17, 18, 17, 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Temukan Peluang',
+                                style: AppTextStyles.pageTitle,
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                'Jelajahi berbagai peluang di sekitarmu.',
+                                style: AppTextStyles.secondary,
+                              ),
+                              const SizedBox(height: 16),
 
-                        TextField(
-                          controller: _searchController,
-                          onChanged: _searchOpportunities,
-                          decoration: InputDecoration(
-                            hintText: 'Cari peluang...',
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: _searchController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      _searchOpportunities('');
-                                    },
-                                  )
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    FilterSummaryBadge.category(
-                                      category: _selectedCategory == 'Semua'
-                                          ? 'Semua'
-                                          : _selectedCategory
-                                                .toLowerCase()
-                                                .replaceAll(' & ', '_'),
-                                      label: _selectedCategory == 'Semua'
-                                          ? 'Semua kategori'
-                                          : _selectedCategory,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    FilterSummaryBadge.region(
-                                      label: _selectedCity,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    FilterSummaryBadge.sort(
-                                      label: _selectedSort,
-                                    ),
-                                  ],
+                              TextField(
+                                controller: _searchController,
+                                onChanged: _searchOpportunities,
+                                decoration: InputDecoration(
+                                  hintText: 'Cari peluang...',
+                                  prefixIcon: const Icon(Icons.search),
+                                  suffixIcon: _searchController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () {
+                                            _searchController.clear();
+                                            _searchOpportunities('');
+                                          },
+                                        )
+                                      : null,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            OutlinedButton.icon(
-                              onPressed: _showFilterSheet,
-                              icon: const Icon(Icons.tune, size: 17),
-                              label: const Text('Filter'),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          FilterSummaryBadge.category(
+                                            category:
+                                                _selectedCategory == 'Semua'
+                                                ? 'Semua'
+                                                : _selectedCategory
+                                                      .toLowerCase()
+                                                      .replaceAll(' & ', '_'),
+                                            label: _selectedCategory == 'Semua'
+                                                ? 'Semua kategori'
+                                                : _selectedCategory,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          FilterSummaryBadge.region(
+                                            label: _selectedCity,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          FilterSummaryBadge.sort(
+                                            label: _selectedSort,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  OutlinedButton.icon(
+                                    onPressed: _showFilterSheet,
+                                    icon: const Icon(Icons.tune, size: 17),
+                                    label: const Text('Filter'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Expanded(
+                          child: FutureBuilder<List<Opportunity>>(
+                            future: _opportunitiesFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const AppLoading(
+                                  message: 'Memuat peluang...',
+                                );
+                              }
+
+                              if (snapshot.hasError) {
+                                return AppError(
+                                  message: 'Gagal memuat peluang.',
+                                  onRetry: () {
+                                    _searchOpportunities(
+                                      _searchController.text,
+                                    );
+                                  },
+                                );
+                              }
+
+                              final opportunities = snapshot.data ?? [];
+
+                              if (opportunities.isEmpty) {
+                                return AppEmpty(
+                                  title: 'Peluang tidak ditemukan',
+                                  description: _searchController.text.isEmpty
+                                      ? 'Belum ada peluang yang tersedia.'
+                                      : 'Coba gunakan kata kunci pencarian lainnya.',
+                                  icon: Icons.search_off_rounded,
+                                );
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_searchController.text.trim().isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        17,
+                                        4,
+                                        17,
+                                        12,
+                                      ),
+                                      child: Text(
+                                        '${opportunities.length} peluang ditemukan',
+                                        style: AppTextStyles.secondary.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+
+                                  Expanded(
+                                    child: RefreshIndicator(
+                                      onRefresh: _refreshOpportunities,
+                                      child: ListView.separated(
+                                        physics:
+                                            const AlwaysScrollableScrollPhysics(),
+                                        padding: const EdgeInsets.fromLTRB(
+                                          17,
+                                          0,
+                                          17,
+                                          16,
+                                        ),
+                                        itemCount: opportunities.length,
+                                        separatorBuilder: (_, _) =>
+                                            const SizedBox(height: 10),
+                                        itemBuilder: (context, index) {
+                                          final opportunity =
+                                              opportunities[index];
+
+                                          final isSaved =
+                                              opportunity.opportunityId !=
+                                                  null &&
+                                              savedIds.contains(
+                                                opportunity.opportunityId,
+                                              );
+
+                                          return OpportunityCard(
+                                            opportunity: opportunity,
+                                            regionName:
+                                                opportunity.regionName ??
+                                                'Wilayah tidak diketahui',
+                                            isGuest: isGuest,
+                                            isSaved: isSaved,
+                                            onTap: () {
+                                              context.push(
+                                                AppRoutes.opportunityDetail,
+                                                extra: opportunity,
+                                              );
+                                            },
+                                            onBookmarkTap: () async {
+                                              if (isGuest) {
+                                                await GuestAccessGuard.check(
+                                                  context,
+                                                  ref,
+                                                );
+                                                return;
+                                              }
+
+                                              await BookmarkActionHelper.toggle(
+                                                context: context,
+                                                ref: ref,
+                                                opportunityId:
+                                                    opportunity.opportunityId,
+                                                isSaved: isSaved,
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
-                  ),
-
-                  Expanded(
-                    child: FutureBuilder<List<Opportunity>>(
-                      future: _opportunitiesFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const AppLoading(message: 'Memuat peluang...');
-                        }
-
-                        if (snapshot.hasError) {
-                          return AppError(
-                            message: 'Gagal memuat peluang.',
-                            onRetry: () {
-                              _searchOpportunities(_searchController.text);
-                            },
-                          );
-                        }
-
-                        final opportunities = snapshot.data ?? [];
-
-                        if (opportunities.isEmpty) {
-                          return AppEmpty(
-                            title: 'Peluang tidak ditemukan',
-                            description: _searchController.text.isEmpty
-                                ? 'Belum ada peluang yang tersedia.'
-                                : 'Coba gunakan kata kunci pencarian lainnya.',
-                            icon: Icons.search_off_rounded,
-                          );
-                        }
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (_searchController.text.trim().isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  17,
-                                  4,
-                                  17,
-                                  12,
-                                ),
-                                child: Text(
-                                  '${opportunities.length} peluang ditemukan',
-                                  style: AppTextStyles.secondary.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-
-                            Expanded(
-                              child: RefreshIndicator(
-                                onRefresh: _refreshOpportunities,
-                                child: ListView.separated(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.fromLTRB(
-                                    17,
-                                    0,
-                                    17,
-                                    16,
-                                  ),
-                                  itemCount: opportunities.length,
-                                  separatorBuilder: (_, _) =>
-                                      const SizedBox(height: 10),
-                                  itemBuilder: (context, index) {
-                                    final opportunity = opportunities[index];
-
-                                    final isSaved =
-                                        opportunity.opportunityId != null &&
-                                        savedIds.contains(
-                                          opportunity.opportunityId,
-                                        );
-
-                                    return OpportunityCard(
-                                      opportunity: opportunity,
-                                      regionName:
-                                          opportunity.regionName ??
-                                          'Wilayah tidak diketahui',
-                                      isGuest: isGuest,
-                                      isSaved: isSaved,
-                                      onTap: () {
-                                        context.push(
-                                          AppRoutes.opportunityDetail,
-                                          extra: opportunity,
-                                        );
-                                      },
-                                      onBookmarkTap: () async {
-                                        if (isGuest) {
-                                          await GuestAccessGuard.check(
-                                            context,
-                                            ref,
-                                          );
-                                          return;
-                                        }
-
-                                        await BookmarkActionHelper.toggle(
-                                          context: context,
-                                          ref: ref,
-                                          opportunityId:
-                                              opportunity.opportunityId,
-                                          isSaved: isSaved,
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),

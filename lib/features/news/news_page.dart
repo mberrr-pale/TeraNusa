@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/news.dart';
 import '../../data/repositories/news_repository.dart';
 import '../../core/constants/app_routes.dart';
+import '../../core/providers/internet_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_header.dart';
@@ -15,15 +17,16 @@ import '../../core/widgets/states/app_error.dart';
 import '../../core/widgets/states/app_empty.dart';
 import '../../core/widgets/app_bottom_sheet.dart';
 import '../../core/widgets/filter_summary_badge.dart';
+import '../../core/widgets/states/app_offline.dart';
 
-class NewsPage extends StatefulWidget {
+class NewsPage extends ConsumerStatefulWidget {
   const NewsPage({super.key});
 
   @override
-  State<NewsPage> createState() => _NewsPageState();
+  ConsumerState<NewsPage> createState() => _NewsPageState();
 }
 
-class _NewsPageState extends State<NewsPage> {
+class _NewsPageState extends ConsumerState<NewsPage> {
   final NewsRepository _repository = NewsRepository(Supabase.instance.client);
 
   final TextEditingController _searchController = TextEditingController();
@@ -73,13 +76,17 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   Future<void> _refreshNews() async {
+    if (ref.read(internetStatusProvider).asData?.value != true) {
+      return;
+    }
+
     final future = _getFilteredNews();
 
     setState(() {
       _newsFuture = future;
     });
 
-    await future;
+    await Future.wait([future, _loadCities()]);
   }
 
   Future<void> _showFilterSheet() async {
@@ -198,6 +205,17 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(internetStatusProvider, (previous, next) {
+      final wasOffline = previous?.asData?.value == false;
+      final isOnline = next.asData?.value == true;
+
+      if (wasOffline && isOnline && mounted) {
+        _refreshNews();
+      }
+    });
+
+    final isOnline = ref.watch(internetStatusProvider).asData?.value;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -206,163 +224,186 @@ class _NewsPageState extends State<NewsPage> {
             const AppHeader(),
 
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(17, 20, 17, 14),
-                    child: Column(
+              child: isOnline == false
+                  ? RefreshIndicator(
+                      onRefresh: _refreshNews,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: constraints.maxHeight,
+                                ),
+                                child: const AppOffline(),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    )
+                  : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Berita Lokal', style: AppTextStyles.pageTitle),
-                        const SizedBox(height: 5),
-                        Text(
-                          'Temukan informasi dan kabar terbaru dari daerah.',
-                          style: AppTextStyles.secondary,
-                        ),
-                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(17, 20, 17, 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Berita Lokal',
+                                style: AppTextStyles.pageTitle,
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                'Temukan informasi dan kabar terbaru dari daerah.',
+                                style: AppTextStyles.secondary,
+                              ),
+                              const SizedBox(height: 16),
 
-                        TextField(
-                          controller: _searchController,
-                          onChanged: _searchNews,
-                          decoration: InputDecoration(
-                            hintText: 'Cari berita...',
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: _searchController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      _searchNews('');
-                                    },
-                                  )
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    FilterSummaryBadge.region(
-                                      label: _selectedCity,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    FilterSummaryBadge.sort(
-                                      label: _selectedSort,
-                                    ),
-                                  ],
+                              TextField(
+                                controller: _searchController,
+                                onChanged: _searchNews,
+                                decoration: InputDecoration(
+                                  hintText: 'Cari berita...',
+                                  prefixIcon: const Icon(Icons.search),
+                                  suffixIcon: _searchController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () {
+                                            _searchController.clear();
+                                            _searchNews('');
+                                          },
+                                        )
+                                      : null,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            OutlinedButton.icon(
-                              onPressed: _showFilterSheet,
-                              icon: const Icon(Icons.tune, size: 17),
-                              label: const Text('Filter'),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          FilterSummaryBadge.region(
+                                            label: _selectedCity,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          FilterSummaryBadge.sort(
+                                            label: _selectedSort,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  OutlinedButton.icon(
+                                    onPressed: _showFilterSheet,
+                                    icon: const Icon(Icons.tune, size: 17),
+                                    label: const Text('Filter'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Expanded(
+                          child: FutureBuilder<List<News>>(
+                            future: _newsFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const AppLoading();
+                              }
+
+                              if (snapshot.hasError) {
+                                return AppError(
+                                  message:
+                                      'Gagal memuat berita. Silakan coba lagi.',
+                                  onRetry: _refreshNews,
+                                );
+                              }
+
+                              final newsList = snapshot.data ?? [];
+
+                              if (newsList.isEmpty) {
+                                return AppEmpty(
+                                  icon: Icons.newspaper_outlined,
+                                  title: 'Berita tidak ditemukan',
+                                  description:
+                                      _searchController.text.trim().isEmpty
+                                      ? 'Belum ada berita yang tersedia.'
+                                      : 'Coba gunakan kata kunci pencarian lainnya.',
+                                );
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_searchController.text.trim().isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        17,
+                                        4,
+                                        17,
+                                        12,
+                                      ),
+                                      child: Text(
+                                        '${newsList.length} berita ditemukan',
+                                        style: AppTextStyles.secondary.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+
+                                  Expanded(
+                                    child: RefreshIndicator(
+                                      onRefresh: _refreshNews,
+                                      child: GridView.builder(
+                                        physics:
+                                            const AlwaysScrollableScrollPhysics(),
+                                        padding: const EdgeInsets.fromLTRB(
+                                          17,
+                                          4,
+                                          17,
+                                          20,
+                                        ),
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 2,
+                                              crossAxisSpacing: 12,
+                                              mainAxisSpacing: 14,
+                                              mainAxisExtent: 205,
+                                            ),
+                                        itemCount: newsList.length,
+                                        itemBuilder: (context, index) {
+                                          return NewsCard(
+                                            news: newsList[index],
+                                            width: double.infinity,
+                                            onTap: () {
+                                              context.push(
+                                                AppRoutes.newsDetail,
+                                                extra: newsList[index],
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
-                  ),
-
-                  Expanded(
-                    child: FutureBuilder<List<News>>(
-                      future: _newsFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const AppLoading();
-                        }
-
-                        if (snapshot.hasError) {
-                          return AppError(
-                            message: 'Gagal memuat berita. Silakan coba lagi.',
-                            onRetry: _refreshNews,
-                          );
-                        }
-
-                        final newsList = snapshot.data ?? [];
-
-                        if (newsList.isEmpty) {
-                          return AppEmpty(
-                            icon: Icons.newspaper_outlined,
-                            title: 'Berita tidak ditemukan',
-                            description: _searchController.text.trim().isEmpty
-                                ? 'Belum ada berita yang tersedia.'
-                                : 'Coba gunakan kata kunci pencarian lainnya.',
-                          );
-                        }
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (_searchController.text.trim().isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  17,
-                                  4,
-                                  17,
-                                  12,
-                                ),
-                                child: Text(
-                                  '${newsList.length} berita ditemukan',
-                                  style: AppTextStyles.secondary.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-
-                            Expanded(
-                              child: RefreshIndicator(
-                                onRefresh: _refreshNews,
-                                child: GridView.builder(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.fromLTRB(
-                                    17,
-                                    4,
-                                    17,
-                                    20,
-                                  ),
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        crossAxisSpacing: 12,
-                                        mainAxisSpacing: 14,
-                                        mainAxisExtent: 205,
-                                      ),
-                                  itemCount: newsList.length,
-                                  itemBuilder: (context, index) {
-                                    return NewsCard(
-                                      news: newsList[index],
-                                      width: double.infinity,
-                                      onTap: () {
-                                        context.push(
-                                          AppRoutes.newsDetail,
-                                          extra: newsList[index],
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
             ),
-
             const AppBottomNavigation(),
           ],
         ),
