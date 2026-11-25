@@ -19,6 +19,8 @@ import '../../data/models/news.dart';
 import '../../features/news/news_detail_page.dart';
 import '../../features/saved/presentation/pages/saved_page.dart';
 import '../../features/contributor/presentation/pages/archived_page.dart';
+import '../../features/splash_onboarding/pages/splash_screen_page.dart';
+import '../../features/splash_onboarding/pages/guest_onboarding_page.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -38,7 +40,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ref.watch(routerRefreshProvider);
 
   final router = GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
 
     navigatorKey: AppRouter.rootNavigatorKey,
     refreshListenable: refreshNotifier,
@@ -68,6 +70,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Halaman yang boleh diakses tanpa login.
       final isGuestAllowed =
+          currentLocation == AppRoutes.splash ||
+          currentLocation == AppRoutes.onboarding ||
           currentLocation == AppRoutes.home ||
           currentLocation == AppRoutes.opportunities ||
           currentLocation == AppRoutes.opportunityDetail ||
@@ -100,6 +104,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
 
     routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        name: 'splash',
+        builder: (context, state) {
+          return const SplashScreenPage();
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.onboarding,
+        name: 'onboarding',
+        builder: (context, state) {
+          return const GuestOnboardingPage();
+        },
+      ),
+
       GoRoute(
         path: AppRoutes.register,
         name: 'register',

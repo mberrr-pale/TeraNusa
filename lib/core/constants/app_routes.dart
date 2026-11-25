@@ -1,6 +1,10 @@
 class AppRoutes {
   AppRoutes._();
 
+  // Splash & Onboarding
+  static const String splash = '/splash';
+  static const String onboarding = '/onboarding';
+
   // Auth
   static const String register = '/register';
   static const String login = '/login';
