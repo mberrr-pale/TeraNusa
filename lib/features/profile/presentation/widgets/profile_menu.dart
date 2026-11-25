@@ -11,6 +11,7 @@ class ProfileMenu extends StatelessWidget {
   final VoidCallback onSaved;
   final VoidCallback onArchived;
   final VoidCallback onOffline;
+  final Widget? additionalItem;
 
   const ProfileMenu({
     super.key,
@@ -21,6 +22,7 @@ class ProfileMenu extends StatelessWidget {
     required this.onSaved,
     required this.onArchived,
     required this.onOffline,
+    this.additionalItem,
   });
 
   @override
@@ -75,7 +77,7 @@ class ProfileMenu extends StatelessWidget {
                 icon: Icons.bookmark_added_rounded,
                 title: 'Tersimpan',
                 subtitle: 'Lihat Peluang yang kamu simpan',
-                isLast: !isContributor,
+                isLast: !isContributor && additionalItem == null,
                 onTap: onSaved,
               ),
 
@@ -84,9 +86,11 @@ class ProfileMenu extends StatelessWidget {
                   icon: Icons.archive_outlined,
                   title: 'Arsip Peluang',
                   subtitle: 'Lihat peluang yang telah diposting',
-                  isLast: true,
+                  isLast: additionalItem == null,
                   onTap: onArchived,
                 ),
+
+              ?additionalItem,
             ],
           ),
         ),

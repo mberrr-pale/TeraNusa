@@ -27,6 +27,8 @@ import '../widgets/profile_logout_button.dart';
 
 import '../widgets/avatar_preview_dialog.dart';
 import '../widgets/avatar_options_sheet.dart';
+import '../../../contributor_review/providers/contributor_application_provider.dart';
+import '../../../contributor_review/widgets/contributor_application_section.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -107,6 +109,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       onSaved: _openSavedPage,
                       onArchived: _openArchivedPage,
                       onOffline: _showOfflineInfo,
+                      additionalItem: user.isAdmin
+                          ? ContributorApplicationSection(
+                              repository: ref.watch(
+                                contributorApplicationRepositoryProvider,
+                              ),
+                              adminName: user.name,
+                            )
+                          : null,
                     ),
 
                     const SizedBox(height: 18),
