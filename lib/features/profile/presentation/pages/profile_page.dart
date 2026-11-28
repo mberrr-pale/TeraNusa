@@ -11,24 +11,19 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_header.dart';
 import '../../../../core/widgets/app_bottom_navigation.dart';
 import '../../../../core/widgets/app_dialog.dart';
-
 import '../../../../data/models/user_profile_model.dart';
-
 import '../../../auth/presentation/providers/auth_provider.dart';
-
+import '../../../contributor_request/presentation/pages/contributor_application_page.dart';
+import '../../../contributor_request/presentation/providers/contributor_req_provider.dart';
+import '../../../admin_dashboard/presentation/widgets/contributor_application_section.dart';
 import '../providers/profile_provider.dart';
-
-import '../widgets/edit_profile_sheet.dart';
-import '../widgets/change_password_sheet.dart';
-
 import '../widgets/profile_header.dart';
 import '../widgets/profile_menu.dart';
 import '../widgets/profile_logout_button.dart';
-
 import '../widgets/avatar_preview_dialog.dart';
 import '../widgets/avatar_options_sheet.dart';
-import '../../../contributor_review/providers/contributor_application_provider.dart';
-import '../../../contributor_review/widgets/contributor_application_section.dart';
+import '../widgets/edit_profile_sheet.dart';
+import '../widgets/change_password_sheet.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -37,7 +32,30 @@ class ProfilePage extends ConsumerStatefulWidget {
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends ConsumerState<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(myContributorApplicationProvider);
+      ref.invalidate(myContributorApplicationStreamProvider);
+    }
+  }
+
   bool _isUploadingAvatar = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -111,12 +129,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       onOffline: _showOfflineInfo,
                       additionalItem: user.isAdmin
                           ? ContributorApplicationSection(
-                              repository: ref.watch(
-                                contributorApplicationRepositoryProvider,
-                              ),
                               adminName: user.name,
+                              regionName: user.regionId,
                             )
                           : null,
+                      onContriReq: (user.isAdmin || user.isContributor)
+                          ? null
+                          : _showContributorReq,
                     ),
 
                     const SizedBox(height: 18),
@@ -377,6 +396,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           'dan coba kembali.',
       type: AppDialogType.warning,
     );
+  }
+
+  // ================= PENGAJUAN CONTRIBUTOR =================
+
+  void _showContributorReq() {
+    final isOnline = ref.read(internetStatusProvider).asData?.value ?? false;
+
+    if (!isOnline) {
+      _showOfflineInfo();
+      return;
+    }
+
+    // Ambil ulang data dari Supabase.
+    ref.invalidate(myContributorApplicationProvider);
+    ref.invalidate(myContributorApplicationStreamProvider);
+
+    ContributorApplicationSheet.show(context);
   }
 
   // ================= LOGOUT =================

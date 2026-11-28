@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/config/supabase_config.dart';
-import '../../../../data/local/app_database.dart';
 
 import '../../data/datasources/region_remote_datasource.dart';
 import '../../data/datasources/region_local_datasource.dart';
@@ -9,15 +8,7 @@ import '../../data/repositories/region_repository_impl.dart';
 import '../../domain/repositories/region_repository.dart';
 import '../../domain/usecases/get_region_by_id.dart';
 import '../../../../data/models/region_model.dart';
-
-// Database
-final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  final database = AppDatabase();
-
-  ref.onDispose(database.close);
-
-  return database;
-});
+import '../../../../core/providers/database_provider.dart';
 
 // Remote DataSource
 final regionRemoteDataSourceProvider = Provider<RegionRemoteDataSource>((ref) {
@@ -26,7 +17,7 @@ final regionRemoteDataSourceProvider = Provider<RegionRemoteDataSource>((ref) {
 
 // Local DataSource
 final regionLocalDataSourceProvider = Provider<RegionLocalDataSource>((ref) {
-  return RegionLocalDataSource(ref.watch(appDatabaseProvider));
+  return RegionLocalDataSource(ref.watch(databaseProvider));
 });
 
 // Repository

@@ -5,6 +5,8 @@ import 'core/providers/internet_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_dialog.dart';
+import 'core/services/notification_navigation_service.dart';
+import 'core/services/notification_service.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -15,6 +17,15 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   bool _isOfflineDialogShowing = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.instance.initialize();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +51,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       title: 'TeraNusa',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      scaffoldMessengerKey: NotificationNavigationService.messengerKey,
       routerConfig: router,
     );
   }

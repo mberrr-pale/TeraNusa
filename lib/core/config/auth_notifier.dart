@@ -9,6 +9,7 @@ import '../../../../core/providers/database_provider.dart';
 
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
+import '../../features/auth/data/datasources/device_service.dart';
 
 import '../../../../data/models/user_profile_model.dart';
 import '../../features/auth/data/models/register_request.dart';
@@ -21,6 +22,11 @@ final supabaseProvider = Provider<SupabaseClient>((ref) {
   return SupabaseConfig.client;
 });
 
+// Device Service Provider
+final deviceServiceProvider = Provider<DeviceService>((ref) {
+  return DeviceService();
+});
+
 // Local DataSource Provider
 final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
   return AuthLocalDataSource(ref.watch(databaseProvider));
@@ -28,7 +34,10 @@ final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
 
 // Remote DataSource Provider
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  return AuthRemoteDataSource(ref.watch(supabaseProvider));
+  return AuthRemoteDataSource(
+    ref.watch(supabaseProvider),
+    ref.watch(deviceServiceProvider),
+  );
 });
 
 // Repository Provider

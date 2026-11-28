@@ -214,7 +214,8 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                             const Text(
                               'Email akun',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.secondaryText,
                               ),
                             ),
@@ -240,7 +241,10 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                                   Expanded(
                                     child: Text(
                                       profile.email,
-                                      style: const TextStyle(fontSize: 12),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.secondaryText,
+                                      ),
                                     ),
                                   ),
                                 ],

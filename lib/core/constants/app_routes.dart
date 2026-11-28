@@ -25,4 +25,6 @@ class AppRoutes {
 
   // Profile
   static const String profile = '/profile';
+
+  static const notificationHistory = '/notification-history';
 }

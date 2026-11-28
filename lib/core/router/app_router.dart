@@ -21,6 +21,10 @@ import '../../features/saved/presentation/pages/saved_page.dart';
 import '../../features/contributor/presentation/pages/archived_page.dart';
 import '../../features/splash_onboarding/pages/splash_screen_page.dart';
 import '../../features/splash_onboarding/pages/guest_onboarding_page.dart';
+import '../../features/admin_dashboard/presentation/pages/admin_dashboard_page.dart';
+import '../../core/services/notification_navigation_service.dart';
+import '../../features/notifications/presentation/pages/notification_history_page.dart';
+import '../../features/admin_dashboard/presentation/pages/opportunity_review_detail_page.dart';
 
 // Router Refresh Provider
 final routerRefreshProvider = Provider<RouterRefreshNotifier>((ref) {
@@ -99,7 +103,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isArchivedRoute && !isContributor) {
         return AppRoutes.home;
       }
-      
+
       return null;
     },
 
@@ -214,6 +218,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+
+      GoRoute(
+        path: '/admin-dashboard',
+        name: 'adminDashboard',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+
+          return AdminDashboardPage(
+            focusSection: extra?['focusSection'] as String?,
+          );
+        },
+      ),
+
+      GoRoute(
+        path: AppRoutes.notificationHistory,
+        name: 'notificationHistory',
+        builder: (context, state) {
+          return const NotificationHistoryPage();
+        },
+      ),
+
+      GoRoute(
+        path: '/opportunity-review/:opportunityId',
+        name: 'opportunityReviewDetail',
+        builder: (context, state) {
+          final opportunityId = state.pathParameters['opportunityId']!;
+
+          return OpportunityReviewDetailPage(opportunityId: opportunityId);
+        },
+      ),
     ],
 
     errorBuilder: (context, state) {
@@ -222,6 +256,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       );
     },
   );
+
+  NotificationNavigationService.initialize(router);
 
   ref.onDispose(router.dispose);
 

@@ -12,6 +12,7 @@ class ProfileMenu extends StatelessWidget {
   final VoidCallback onArchived;
   final VoidCallback onOffline;
   final Widget? additionalItem;
+  final VoidCallback? onContriReq;
 
   const ProfileMenu({
     super.key,
@@ -23,10 +24,12 @@ class ProfileMenu extends StatelessWidget {
     required this.onArchived,
     required this.onOffline,
     this.additionalItem,
+    this.onContriReq,
   });
 
   @override
   Widget build(BuildContext context) {
+    final contriReq = onContriReq;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -80,6 +83,14 @@ class ProfileMenu extends StatelessWidget {
                 isLast: !isContributor && additionalItem == null,
                 onTap: onSaved,
               ),
+
+              if (!isContributor && contriReq != null)
+                ProfileMenuItem(
+                  icon: Icons.library_books_rounded,
+                  title: 'Pengajuan Kontributor',
+                  subtitle: 'Jadilah Kontributor untuk kontribusi lebih baik',
+                  onTap: contriReq,
+                ),
 
               if (isContributor)
                 ProfileMenuItem(

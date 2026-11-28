@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "170021316998",
+    "project_id": "teranusa-b5d58",
+    "storage_bucket": "teranusa-b5d58.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:170021316998:android:79ad51f564133ea841e407",
+        "android_client_info": {
+          "package_name": "id.teranusa.teranusa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDw5xBWtmHFkw8E48DEfU7T0qojYGoo-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

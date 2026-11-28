@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../services/notification_history_service.dart';
 
 class AppHeader extends StatelessWidget {
   final String? title;
@@ -63,7 +65,13 @@ class AppHeader extends StatelessWidget {
               border: Border.all(color: AppColors.border),
             ),
             child: IconButton(
-              onPressed: () => Navigator.of(context).maybePop(),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.goNamed('dashboard');
+                }
+              },
               icon: const Icon(
                 Icons.arrow_back_rounded,
                 color: AppColors.heading,
@@ -88,10 +96,7 @@ class AppHeader extends StatelessWidget {
           ),
         ),
         if (trailing != null)
-          Align(
-            alignment: Alignment.centerRight,
-            child: trailing!,
-          ),
+          Align(alignment: Alignment.centerRight, child: trailing!),
       ],
     );
   }
@@ -144,33 +149,57 @@ class AppHeader extends StatelessWidget {
             ),
             const Spacer(),
             if (hasSession)
-              IconButton(
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (dialogContext) {
-                      return AlertDialog(
-                        title: const Text('Notifikasi'),
-                        content: const Text(
-                          'Fitur notifikasi sedang dalam tahap pengembangan.',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
-                            },
-                            child: const Text('Mengerti'),
-                          ),
-                        ],
-                      );
+              StreamBuilder<int>(
+                stream: NotificationHistoryService.instance.watchUnreadCount(),
+                builder: (context, snapshot) {
+                  final count = snapshot.data ?? 0;
+
+                  return IconButton(
+                    tooltip: 'Notifikasi',
+                    onPressed: () {
+                      context.pushNamed('notificationHistory');
                     },
+                    icon: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(
+                          Icons.notifications_none_rounded,
+                          color: AppColors.heading,
+                          size: 24,
+                        ),
+                        if (count > 0)
+                          Positioned(
+                            right: -6,
+                            top: -6,
+                            child: Container(
+                              constraints: const BoxConstraints(
+                                minWidth: 17,
+                                minHeight: 17,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  count > 99 ? '99+' : '$count',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   );
                 },
-                icon: const Icon(
-                  Icons.notifications_none_rounded,
-                  color: AppColors.heading,
-                  size: 22,
-                ),
               ),
           ],
         );

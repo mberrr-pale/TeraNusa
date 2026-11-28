@@ -21,6 +21,7 @@ import '../../core/widgets/guest_access_guard.dart';
 import '../../core/utils/bookmark_action_helper.dart';
 import '../../core/providers/internet_provider.dart';
 import '../../data/models/opportunity.dart';
+import 'presentation/providers/report_provider.dart';
 
 class OpportunityDetailPage extends ConsumerStatefulWidget {
   final Opportunity opportunity;
@@ -133,7 +134,7 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
       'Lainnya',
     ];
 
-    final shouldShowFeedback = await AppBottomSheet.show<bool>(
+    final reportData = await AppBottomSheet.show<Map<String, String>>(
       context: context,
       title: 'Laporkan Peluang',
       contentBuilder: (sheetContext, setSheetState) {
@@ -257,7 +258,13 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
               onPressed: canSubmit
                   ? () {
                       FocusScope.of(sheetContext).unfocus();
-                      Navigator.of(sheetContext).pop(true);
+
+                      Navigator.of(sheetContext).pop({
+                        'reason': selectedReason!,
+                        'description': isOtherSelected
+                            ? otherReasonText.trim()
+                            : '',
+                      });
                     }
                   : null,
               height: 50,
@@ -267,11 +274,10 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
       },
     );
 
-    if (shouldShowFeedback == true && context.mounted) {
-      AppSnackBar.showError(
-        context,
-        title: 'Fitur belum tersedia',
-        message: 'Pelaporan peluang belum dapat digunakan saat ini.',
+    if (reportData != null && context.mounted) {
+      await _submitReport(
+        reason: reportData['reason']!,
+        description: reportData['description'] ?? '',
       );
     }
   }
@@ -689,6 +695,50 @@ class _OpportunityDetailPageState extends ConsumerState<OpportunityDetailPage> {
           message: 'Silakan coba lagi nanti.',
         );
       }
+    }
+  }
+
+  Future<void> _submitReport({
+    required String reason,
+    required String description,
+  }) async {
+    final opportunityId = opportunity.opportunityId;
+
+    if (opportunityId == null) {
+      AppSnackBar.showError(
+        context,
+        title: 'Gagal mengirim laporan',
+        message: 'ID peluang tidak tersedia.',
+      );
+      return;
+    }
+
+    try {
+      await ref
+          .read(reportRepositoryProvider)
+          .submitReport(
+            opportunityId: opportunityId,
+            reason: reason,
+            description: description,
+          );
+
+      if (!mounted) return;
+
+      AppSnackBar.showSuccess(
+        context,
+        title: 'Laporan berhasil dikirim',
+        message: 'Terima kasih telah membantu menjaga TeraNusa.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final message = e.toString().replaceFirst('Exception: ', '');
+
+      AppSnackBar.showError(
+        context,
+        title: 'Gagal mengirim laporan',
+        message: message,
+      );
     }
   }
 

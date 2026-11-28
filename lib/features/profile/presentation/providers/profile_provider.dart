@@ -11,6 +11,7 @@ import '../../data/datasources/profile_local_datasource.dart';
 import '../../data/repositories/profile_repository_impl.dart';
 import '../../data/repositories/profile_repository.dart';
 import '../../../auth/data/datasources/auth_remote_datasource.dart';
+import '../../../auth/data/datasources/device_service.dart';
 
 // Remote DataSource
 final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((
@@ -52,11 +53,23 @@ final changePasswordProvider = Provider((ref) {
   };
 });
 
-final logoutAllDevicesProvider = Provider((ref) {
-  final authRemoteDataSource = AuthRemoteDataSource(Supabase.instance.client);
+// DEVICE SERVICE
+final deviceServiceProvider = Provider<DeviceService>((ref) {
+  return DeviceService();
+});
 
+// AUTH REMOTE DATA SOURCE
+final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
+  return AuthRemoteDataSource(
+    Supabase.instance.client,
+    ref.watch(deviceServiceProvider),
+  );
+});
+
+// LOGOUT ALL DEVICES
+final logoutAllDevicesProvider = Provider((ref) {
   return () async {
-    await authRemoteDataSource.logoutAllDevices();
+    await ref.read(authRemoteDataSourceProvider).logoutAllDevices();
   };
 });
 

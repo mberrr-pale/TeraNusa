@@ -2,6 +2,7 @@ import '../../domain/repositories/auth_repository.dart';
 
 import '../../../../../data/models/user_profile_model.dart';
 import '../models/register_request.dart';
+import '../../../../../data/models/user_device_model.dart';
 
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
@@ -27,7 +28,22 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
 
-    // Simpan profile untuk penggunaan offline.
+    await localDataSource.saveUserProfile(profile);
+    return profile;
+  }
+
+  // REGISTER ONLINE
+  @override
+  Future<UserProfile> register(RegisterRequest request) async {
+    final response = await remoteDataSource.register(request);
+    final user = response.user;
+
+    if (user == null) {
+      throw Exception('User tidak ditemukan setelah registrasi.');
+    }
+
+    final profile = await remoteDataSource.getUserProfile(user.id);
+
     await localDataSource.saveUserProfile(profile);
 
     return profile;
@@ -49,27 +65,22 @@ class AuthRepositoryImpl implements AuthRepository {
     return profile;
   }
 
-  // REGISTER ONLINE
+  // SYNC DEVICE
   @override
-  Future<UserProfile> register(RegisterRequest request) async {
-    // 1. Register ke Supabase Auth
-    final response = await remoteDataSource.register(request);
+  Future<void> syncDevice() async {
+    await remoteDataSource.syncCurrentDevice();
+  }
 
-    // 2. Ambil user ID
-    final user = response.user;
+  // GET ALL USER DEVICES
+  @override
+  Future<List<UserDevice>> getUserDevices() async {
+    return remoteDataSource.getUserDevices();
+  }
 
-    if (user == null) {
-      throw Exception('User tidak ditemukan setelah registrasi');
-    }
-
-    // 3. Ambil profile dari tabel profiles
-    final profile = await remoteDataSource.getUserProfile(user.id);
-
-    // 4. Simpan profile ke local database
-    await localDataSource.saveUserProfile(profile);
-
-    // 5. Return profile
-    return profile;
+  // GET ACTIVE DEVICES
+  @override
+  Future<List<UserDevice>> getActiveDevices() async {
+    return remoteDataSource.getActiveDevices();
   }
 
   // LOGOUT CURRENT DEVICE
@@ -80,7 +91,18 @@ class AuthRepositoryImpl implements AuthRepository {
     // Logout hanya pada device saat ini.
     await remoteDataSource.logout();
 
-    // Hapus cache user pada device saat ini.
+    if (userId != null) {
+      await localDataSource.clearUserProfile(userId);
+    }
+  }
+
+  // LOGOUT ALL DEVICES
+  @override
+  Future<void> logoutAllDevices() async {
+    final userId = remoteDataSource.currentUserId;
+
+    await remoteDataSource.logoutAllDevices();
+
     if (userId != null) {
       await localDataSource.clearUserProfile(userId);
     }

@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,6 +9,7 @@ import '../../../../core/providers/database_provider.dart';
 // Data Sources
 import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
+import '../../data/datasources/device_service.dart';
 
 // Models
 import '../../../../data/models/user_profile_model.dart';
@@ -28,6 +28,14 @@ final supabaseProvider = Provider<SupabaseClient>((ref) {
 });
 
 // ============================================================
+// DEVICE SERVICE PROVIDER
+// ============================================================
+
+final deviceServiceProvider = Provider<DeviceService>((ref) {
+  return DeviceService(messaging: FirebaseMessaging.instance);
+});
+
+// ============================================================
 // LOCAL DATA SOURCE PROVIDER
 // ============================================================
 
@@ -40,7 +48,10 @@ final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
 // ============================================================
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  return AuthRemoteDataSource(ref.watch(supabaseProvider));
+  return AuthRemoteDataSource(
+    ref.watch(supabaseProvider),
+    ref.watch(deviceServiceProvider),
+  );
 });
 
 // ============================================================
@@ -110,13 +121,10 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
     state = const AsyncLoading();
 
     try {
-      // Register dan dapatkan UserProfile dari repository.
       final profile = await _repository.register(request);
 
-      // Update state Riverpod.
       state = AsyncData(profile);
 
-      // Kembalikan profile ke RegisterPage.
       return profile;
     } catch (e, st) {
       state = AsyncError(e, st);
@@ -172,6 +180,23 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
 
     try {
       await _repository.logout();
+
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
+
+  // ==========================================================
+  // LOGOUT ALL DEVICES
+  // ==========================================================
+
+  Future<void> logoutAllDevices() async {
+    state = const AsyncLoading();
+
+    try {
+      await _repository.logoutAllDevices();
 
       state = const AsyncData(null);
     } catch (e, st) {
